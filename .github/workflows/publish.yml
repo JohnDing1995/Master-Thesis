@@ -1,0 +1,37 @@
+name: Build LaTeX document
+on: [push]
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+      - name: Checkout github pages repo
+        uses: actions/checkout@v2
+        with:
+          repository: JohnDing1995/JohnDing1995.github.io
+          path: gh-page
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@master
+        with:
+          root_file: thesis.tex
+      - name: Copy compiled pdf
+        run: |
+            ls gh-page/files
+            cp -rf thesis.pdf gh-page/files/thesis.pdf
+      - name: Commit files
+        run: |
+            cd gh-page/files/
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add thesis.pdf
+            git commit -m "update thesis"
+            cd ../..
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_ACTION_TOKEN}}
+          repository: JohnDing1995/JohnDing1995.github.io
+          branch: test
+          directory: gh-page
+          force: true
