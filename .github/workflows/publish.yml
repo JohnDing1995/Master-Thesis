@@ -11,10 +11,10 @@ jobs:
         with:
           repository: JohnDing1995/JohnDing1995.github.io
           path: gh-page
-      - name: Compile LaTeX document
-        uses: xu-cheng/latex-action@master
-        with:
-          root_file: thesis.tex
+      # - name: Compile LaTeX document
+      #   uses: xu-cheng/latex-action@master
+      #   with:
+      #     root_file: thesis.tex
       - name: Copy compiled pdf
         run: |
             cp -rf thesis.pdf gh-page/files/thesis.pdf
