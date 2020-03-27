@@ -30,6 +30,7 @@ In the software development, CI/CD refers to continuous integration, continuous 
 Continuous interaction is the base practice of all practices within CI/CD, and continuous delivery/deployment is based on the continuous interaction.\cite{Continuo67:online}
 The continuous integration means the team integrate each team member's work into main codebase frequently(multiple times per day). "Integrate" means merge the code to the main codebase.\cite{fowler2006continuous}. The continuous interaction rely on 2 practices: \textit{Build Automation} and  \textit{Test Automation}. The definition of these 2 practices are:
 \begin{itemize}
+    \label{TestA}
     \item \textit{Test Automation:} Test automation means using separate software to execute the software automated, without human intervention. It could help the team to test fast and test early. \cite{Testauto48:online}
     \item \textit{Build Automation:} Automate the process of creating software build. This means to automate the dependency configuration, source code compiling, packaging and testing. It is viewed as the first step to continuous integration \cite{Buildaut62:online}
 \end{itemize}
@@ -38,6 +39,7 @@ With the help of these 2 practices, for each developer in the team, the workflow
 After the step above, the developer already has the executable and the high quality (passed the automated test) code in the development machine before submitting the change to the code base. This represents the principle of quality and automation in agile software development. In the next step, the developer commits changes to the repository, which is the main codebase, and the system check the conflict and do the test/build again, to make sure that there are not any bugs missed in the test on the development machine.
 If the code passes this build and test, it will be merged to the main codebase and the integration is done.
 \subsection{Continuous Delivery and Continuous Deployment}
+\label{CD}
 Continuous delivery is practices that software development team build a software that can be released at any time of the lifecycle.\cite{fowler2013continuous}This means the software always maintains a high quality and in a deployable state.\cite{WhatisCo47:online} It is a subset of agile, which focuses on the software delivery.\cite{Continuo97:online} From the last section, we introduce the concept of continuous interaction. The continuous delivery is based on continuous interaction but further automate the software deployment pipeline. In the software deployment pipeline, the team divide build into several stages, first build the product and then push the product into the production-like environment for further testing. This ensures that the software could be pushed to production at any time. However, in continuous delivery, the deployment of software into production is done manually.
 The benefit of continuous delivery includes:\cite{WhatisCo47:online}\cite{fowler2013continuous}
 \begin{itemize}
@@ -46,7 +48,10 @@ The benefit of continuous delivery includes:\cite{WhatisCo47:online}\cite{fowler
     \item Short time before going to the market: The iteration of software development is much shorter. The automation in testing, deployment, environment confirmation included in the process, and the always read-to-deploy status shorten the time from development to market.
 \end{itemize}
 The continuous deployment is based on continuous delivery. The only difference is continuous deployment automates the deployment process. In continuous delivery, the software is deployable but not deploy without manual approval. In the continuous deployment, each change that passed automated build and testing will be deployed directly. The continuous deployment is a relatively new concept that most company not yet put the practice into production.\cite{leppanen2015highways} While continuous delivery is the required practice for the company to be DevOps and it is already being widely used.
-\section{Infrastructure as Code}
+% \section{Infrastructure as Code}
+% The infrastructure is the software infrastructure and configuration needed for the software.
+% Infrastructure as code (in short IasC) as it says on its name. is to define the infrastructure with code, and using the tools in the software development to manages these codes which includes version control. \cite{artac2017devops}
+
 \section{DevOps}
 \begin{quotation}
     The fundamental goal of DevOps is to minimize the service overhead so that it can respond to change with minimal effort and deliver the maximum amount of value during its lifetime.
@@ -55,9 +60,15 @@ The continuous deployment is based on continuous delivery. The only difference i
     \end{flushright}
 \end{quotation}
 \subsection{Definition}
-DevOps is a set of practices that aims to combine different, traditionally separated disciplines (eg. software development, operations, QA, and others) in cross-functional teams with the help of automation of work to speed up software delivery without risking high-quality .\cite{bass2015devops}
+DevOps is a set of practices that aims to combine different, traditionally separated disciplines (eg. software development, operations, QA, and others) in cross-functional teams with the help of automation of work to speed up software delivery without risking high-quality.\cite{bass2015devops}
 \par
-DevOps is the extension and evolution\cite{lwakatare2016relationship}\cite{leite2019survey} of Agile. DevOps and Agile both driven by the collaboration ideology and the adoption of DevOps needs Agile as the key factor.\cite{lwakatare2016relationship} DevOps has a different focus on agile.  DevOps focus on the delivery while agile is focused on the development with the requirement and customer.
+DevOps is the extension and evolution\cite{lwakatare2016relationship}\cite{leite2019survey} of Agile. DevOps and Agile both driven by the collaboration ideology and the adoption of DevOps needs Agile as the key factor.\cite{lwakatare2016relationship} DevOps has a different focus on agile. DevOps focus on the delivery while agile is focused on the development with the requirement and customer. Figure \ref{fig:DevOps}\cite{DevOpsin72:online} shows the workflow and practices of a team working under DevOps.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{pics/DevOps.png}
+    \caption{DevOps Practices and Workflow}
+    \label{fig:DevOps}
+\end{figure}
 \subsection{Elements}
 In this section, we will introduce the necessary elements that an organization need to includes when employing DevOps. 4 necessary elements need to be considered.
 \subsubsection[]{Culture}
@@ -70,10 +81,6 @@ The incentive and responsibility alignment mean the whole teams (combines Dev an
 \par 
 Respect means all employees should respect and recognize the contribution of other teams members. A DevOps team is not a single team without any division of jobs, there is still an operation part within a team. \cite{TheresNo86:online} However the people operation team will take development responsibility, and the developers will also put their hands-on operation and management.\cite{shropshire2017uncertainty} To make people with different roles works in a team, trust and respect each other is critically important. 
 \subsubsection[]{Organisation}
-
-% Software architecture perspective
-% ref: 
-% Team structure perspective
 In the organizational level, the DevOps emphasizes the collaboration between different part of an organization. This is strongly correlated with the "culture" part of this section. Inside a team, each member should be a generalist who could understand all aspect of a project. There will not be a dedicate QA, operation or security team within a team. Instead, these are the job that belongs to everyone\cite{feitelson2013development}\cite{kim2016devops} The organization should provide the team member with opportunities to learn all skill needed for building the whole system. 
 \par
 The team size should be small. A small team could help to reduce the inter-team communication. The small team means the scope of the project is small. And it also means less bureaucracy in team management. There are four benefits to have a small team:\cite{kim2016devops}
@@ -89,6 +96,14 @@ The first benefit of this is the better safety.
 In the organisation with a tightly-coupled architecture, small changes could result in large failure.\cite{kim2016devops} 
 The second benefit is productive. In a traditional organisation, the result of each team will be merged, tested together and deploy together. This means it is time-costly to configure and manage the test environment requires dependencies. A loose organisation enable each team to finish the development of lifecycle (from planing to deployment) independently. Each team could update their products independently, which gives the team more flexibly to align the product with the change in the customer requirement. This means the update of each team's product won't affect other teams as well.
 \subsubsection[]{Automation}
-% 
+In the DevOps, automation means 
+automation within the whole development and operation process. The organisations which employing DevOps aims for a high degree of automation.\cite{erich2017qualitative} 
+With automation, people could be free from the repetitive work and reduce human error. It could help build the DevOps culture of collaboration, and it is seen as the cornerstone of the DevOps.\cite{DevOpsCu76:online}
+The main practices regarding Automation are the automated testing, continuous delivery and automated operation. Automated testing could be achieved by test automation. We already mentioned the benefit of this at \ref{TestA}.
+\par
+The continuous delivery pipeline is the core of the DevOps.\cite{gill2018devops} As we discussed at \ref{CD}. The continuous delivery will ultimately automate all steps between the developer to commit the code to the product in the production.
+\par
+The automation of the operation part is usually done by using the concept of "Infrastructure as Code"\cite{lwakatare2015dimensions}. The Infrastructure as Code (IasC) means to define everything in the software infrastructure level as code.\cite{artac2017devops} Because it is code, we could use the automation methodology used in the software development to manages and deploy these codes. According to Christof et. (2016), under IasC, infrastructure can be shared, tested, and version controlled. \cite{ebert2016devops} This could help emphasizes the automation within the operation scope. With the automation in operation, the team could be free from the tedious environment configuration and shorten the product development lifecycle. Automating server configuration means the developers and operation staff can equally know the server configuration \cite{DevOpsCu76:online} which help build the culture of shared responsibility and trust.
 \subsubsection[]{Measurement}
+
 \subsection{DevOps Practices}
