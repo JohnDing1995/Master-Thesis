@@ -1,12 +1,33 @@
 \chapter{Introduction}
 \label{chp:introduction}
+The Agile Manifesto drafted by Kent Beck etc. in 2001 created the Agile software development methods\cite{beck2001manifesto}. Since then, this new software development methods have draw attention of the industry and more and more companies started to apply Agile in the production.
+The Agile method advocates the shorter development iteration, continuous development of software and continuous delivery of the software to the customer. The goal of Agile is to satisfies customer with early and continuous delivery of the software.\cite{beck2001manifesto} 
+\par
+The Agile, which aims at the improvement of the process within the software development team and the communication between the development team and costumers \cite{miglierina2014application} do makes the software development faster. However, it doesn't emphasis the cooperation and communication between the development team and other teams. In real life, the conflict and lack of communication between the development team and operation teams usually become the barrier for shortening the delivery time of the software project.
+\par
+Thus, the concept of DevOps emerged in recent years. The term "DevOps" is created by Patrick Debois in 2009, after he saw the presentation "10 deployments per day" by John Allspaw and Paul Hammond.\cite{kim2016devops} While Agile fills the gap between software development and business requirement from the customer, the DevOps eliminates the gap between the development team and the operation team. \cite{WhatisaD20:online} By eliminates the barrier we mentioned in the last paragraph, DevOps further fasten software delivery. In conclusion,
+DevOps means a combination of practices and culture which aims to combine separate departments(software development, quality assurance and the operation and others) in the same team, in order fasten the software delivery, maximizing delivered without risking high software quality. \cite{DevOpsWi87:online}\cite{ebert2016devops} 
+\par
+Helping the customer do the DevOps transformation is one of the main business activities of Eficode, the company which I'm writing my thesis. The DevOps toolchain is important for the company to help it's costumers to employ DevOps practices. For Eficode, It's important to help costumers select the toolchain tha has low cost, short implement time and good performance. 
+The repaid development of the cloud and container technologies brings new ways for us to develop and deploy the tools and software. This new changes brought by cloud may further improving the performance, lower the cost of DevOps toolchain development -- both in money and time. As part of thesis work at Eficode, I investigated how could cloud technologies helps improve the DevOps toolchain. 
 \section{Problem Statement}
-DevOps is a concept which emerged in recent years. The term "DevOps" is created by Patrick Debois in 2009, after he saw the presentation "10 deployments per day" by John Allspaw and Paul Hammond.\cite{kim2016devops} DevOps is the combination of practices, and culture which aims to combine separate departments(software development, quality assurance and the operation and others) in the same team, in order fasten the software delivery without risking high software quality.\cite{DevOpsWi87:online}\cite{ebert2016devops}
+% Don't refer RQs here
+As the title says, the paper focuses on the toolchain in the DevOps. In software engineering, the toolchain is a set of tools which combined for performing a specific objective. Thus DevOps toolchain is the integration between tools that specialised in different aspect of the ecosystem, which support and coordinate the DevOps practices. The DevOps toolchain could assistant business in creating and maintain an efficient software delivery pipeline, simplify the task and further achieve DevOps.\cite{DevOpsto7:online}\cite{Toolchai10:online} On the other hand, DevOps is strongly rely on tools. There are specialised tools exist for helping teams adopt different DevOps practices\cite{zhu2016devops}.
 \par
-For a software team which will employ DevOps, the team must first understand what are the DevOps practices needed. This problem leads to the RQ1 of this paper.
-Usually, the practices that the team need to adopt help to employ DevOps includes: automated testing and deployment, monitoring, team-working and continues integration etc.\cite{jabbari2016devops}\cite{zhu2016devops}.
+At the same period that the tools for DevOps emerged and developed, the cloud technologies also developed rapidly. Compared with traditional on premise services, the new cloud services brings brand new ways for the implementation and deployment of software. Here are few examples:
+Software as a Service(SaaS) allow vendors provides the DevOps toolchain under a single application. A good example is GitLab CI \footnote{https://about.gitlab.com/stages-DevOps-lifecycle/}. GitLab CI provides a complete set of tools which covers the whole lifecycle. The toolchain is delivered as a single platform that allows development teams to start using DevOps toolchain without the pain of having to choose, integrate, learn, and maintain a multitude of tools. Serverless computing such as AWS Lambda and Google Cloud Function allows application to be divided by functions and designed under event-driving paradigm. The Serverless computing cloud could be used to deploy certain component of a DevOps toolchain to ease the implementation difficulties and reduce the cost.
+The managed scalable container services in cloud could help the toolchain become more scalable. Compared with traditional virtual machine, the container allow applications to be faster deployed, patched and scaled.\cite{WhatareC61:online}
 \par
-DevOps strongly rely on tools. There are specialised tools exist for helping teams adopt different DevOps practices\cite{zhu2016devops}. There are different categories of tools used for different parts of the DevOps practice. For example, Jenkins for continuous integration, Ansible for process automation, sonarqube for code analysis, Slack for team communications etc. It could be interesting if we could investigate what kind of tools does it exist, and how those tools could help teams in DevOps different practice. The research could include how these tools could combine as well. This leads to RQ2.
+As we can see from examples, the DevOps toolchain could leverage the capability of cloud services and benefit from it. So as part of the research questions we will investigate how does cloud services benefits the DevOps toolchain.
+\par
+In introduction above we mentioned the SaaS DevOps toolchain. Or according some vendors(for example GitLab), this kind of toolchain is being called "DevOps Platform". This new emerged type of toolchain leave a question to the development team: which kind of toolchain should they select. The SaaS toolchain provides a out-of-box integrated solution for the whole DevOps lifecycle, which is tempting, but apart from the advertisement from the vendors of these "DevOps" platforms, It is still unclear if it is real better than the traditional self-built toolchain. So the another part of our research is to compare these two kinds of toolchains on different DevOps metrics. This could give the software development team a better knowledge on which kind of toolchain suites them the best.
+\par
+Based on above, the research questions could be summarised as below:
+\begin{enumerate}
+    \item \textbf{RQ1:} How DevOps toolchain make use of current cloud services and how these services improves the DevOps toolchain.
+    \item \textbf{RQ2:} How does the newly emerged SaaS single platform toolchain compared with the toolchain we build?
+\end{enumerate}
+% DevOps strongly rely on tools. There are specialised tools exist for helping teams adopt different DevOps practices\cite{zhu2016devops}. There are different categories of tools used for different parts of the DevOps practice. For example, Jenkins for continuous integration, Ansible for process automation, sonarqube for code analysis, Slack for team communications etc. It could be interesting if we could investigate what kind of tools does it exist, and how those tools could help teams in DevOps different practice. The research could include how these tools could combine as well. 
 % \par 
 % Typically, the DevOps platform formulates the DevOps life cycle into the following stages:\cite{DevOps1016:online}
 % \begin{itemize}
@@ -15,33 +36,28 @@ DevOps strongly rely on tools. There are specialised tools exist for helping tea
 %     \item Deployment
 %     \item Operation and monitoring 
 % \end{itemize}
+% Move below to CH3
+% \par
+% The deployment of toolchain could be on-premise, which means the software development team does the deployment and integration between the tools by themselves. This could: first, provides the maximum freedom for the team to choose the tools, and secondly, allow team customise the toolchain according to their needs. However, the downside is that the need for extra time for deployment and maintenance. Besides, the cost is hard to calculate and control. 
+\section{Research Method}
+To answer the RQ 1 we will first build a DevOps toolchain with the popular tools used in the industry. We will also try to justify why do we select a certain tool for each component. The toolchain will be deployed on Amazon Web Services (AWS) which is the cloud services used by Eficode. AWS contains many new cloud services for example AWS Lambda for serverless computing and AWS EKS for managed Kubernetes services. 
+So In the process of develop and deploy the toolchain, we will answer the RQ by research how could cloud services in AWS benefit our toolchain. We will tye to investigate from different perspectives includes cost, performance and development difficulties. We will also have the demo implementations which shows the answer to this research question.
 \par
-In software engineering, the toolchain is a set of tools which combined for performing a specific objective. Thus DevOps toolchain is the integration between tools that specialised in different aspect of the ecosystem, which support and coordinate the DevOps practices. The DevOps toolchain could assistant business in creating and maintain an efficient software delivery pipeline, simplify the task and further achieve DevOps.\cite{DevOpsto7:online}\cite{Toolchai10:online}
-\par
-The deployment of toolchain could be on-premise, which means the software development team does the deployment and integration between the tools by themselves. This could: first, provides the maximum freedom for the team to choose the tools, and secondly, allow team customise the toolchain according to their needs. However, the downside is that the need for extra time for deployment and maintenance. Besides, the cost is hard to calculate and control. 
-\par
-With the development of cloud technologies, now some vendors starting provides the DevOps toolchain under a single application with the concept of Software as a Service(SaaS). A good example is GitLab CI \footnote{https://about.gitlab.com/stages-DevOps-lifecycle/}. GitLab CI provides a complete set of tools which covers the whole lifecycle. The toolchain is delivered as a single platform that allows development teams to start using DevOps toolchain without the pain of having to choose, integrate, learn, and maintain a multitude of tools. \cite{TheDevOp71:online}
-\par
-So the RQ3 of this thesis project focuses on the comparison between these 2 kinds of toolchains. We will build a DevOps toolchain with the popular tools used in the industry, the deployment and integration of the toolchain will be on-promise. We will also try to justify why do we select a certain tool for each section. This self-built toolchain will be used to compare with commercial singe application DevOps toolchain. We will pick the most popular singe application DevOps toolchain for comparison. In the comparison, we will simulate the same DevOps lifecycle of a demo Spring Boot web app in these 2 toolchains. The perspective of comparison between these toolchains will include:
-\begin{itemize}
-    \item Development time: The time spend for implements the toolchain and set up the whole DevOps pipeline.
-    \item Cost structure: The total cost for using the toolchain. For self-built toolchain, it will also include the cost decomposition (for different tools).
-    \item Flexibility: How much freedom can you add/change tools in the toolchain.
-    \item Scalability: How easy to scale the toolchain for the larger project.
-    \item Performance: The performance of the Continues Delivery pipeline, for the same task, how long will it take for the whole process?
-\end{itemize}
-From this part of the study, we could make a full comparison between on-premise toolchain and the single application toolchain. For software development teams, it could provide better insights into how to select the DevOps toolchains.
-\section{Research Objectives and Questions}
-\begin{itemize}
-    \item RQ1: What kind of practices a software development team need to employ DevOps.
-    \item RQ2: What kind of DevOps tools could be included in the toolchain that would help the team implements the practices mentioned in RQ1.
-    \item RQ3: How does the single platform toolchain compared with the on-premise toolchain we build?
-\end{itemize}
+To answer RQ2, This self-built toolchain will be used to compare with commercial singe application DevOps toolchain. We will pick the most popular singe application DevOps toolchain for comparison. In the comparison, we will simulate the same DevOps lifecycle of a demo Spring Boot web app on both toolchains. 
+% The perspective of comparison between these toolchains will include:
+% \begin{itemize}
+%     \item Development time: The time spend for implements the toolchain and set up the whole DevOps pipeline.
+%     \item Cost structure: The total cost for using the toolchain. For self-built toolchain, it will also include the cost decomposition (for different tools).
+%     \item Flexibility: How much freedom can you add/change tools in the toolchain.
+%     \item Scalability: How easy to scale the toolchain for the larger project.
+%     \item Performance: The performance of the Continues Delivery pipeline, for the same task, how long will it take for the whole process?
+% \end{itemize}
+From this part of the study, we could make a full comparison between traditional toolchain and the new emerged SaaS single application toolchain. For software development teams, it could provide better insights on how to select the DevOps toolchains.
 \section{Thesis Structure and Main Contributions}
-In Chapter 2, we will introduce concepts within the scope of DevOps. We will also include the concepts in cloud computing which is related to our research. Chapter 3 is focuses on the literature analysis of DevOps practices. Chapter 4 is focuses on the tools which helping apply the DevOps practices. Chapter 5 focuses on the implementation of DevOps toolchains and the experimentation for comparison between 2 kinds of toolchains. We will summarize our research on the Chapter 6.
+In Chapter 2, we will introduce concepts within the scope of DevOps. We will also include the concepts in cloud computing which is related to our research. Chapter 3 is focusing on the tools which helping apply the DevOps practices. Chapter 4 focuses on the implementation of DevOps toolchains ans will discuss how cloud services could benefit DevOps toolchain. Chapter 5 will discuss the experimentation comparing between toolchains. We will finally summarise our research in Chapter 6.
 \par
 The main contributions of this paper are:
 \begin{itemize}
-    \item We conduct a literature research on the practices that are necessary for a team to employ DevOps(Chapter 3). We provide a study on the DevOps tools and their mapping to different DevOps practices. This part of research could help the software team which is going to employ DevOps understand the practices needed. Besides, the research gives them a clearer scope on the tools needed for implementing the practices(Chapter 4).
-    \item We give the overview on 2 different types of DevOps toolchain. We also implements demo prototypes for each type of the toolchain, and conduct experiments with these prototypes. The experiment result shows the comparison between different toolchains. It could help team understand which toolchain cloud be selected according to the needs(Chapter 5).
+    \item We provide a study on how could the DevOps tools leverage the cloud services to reduced development/deployment difficulties, lower the cost and improving the performance. This part of research could help the software team which is going to employ DevOps understand the practices needed. Besides, the research gives them a clearer scope of the tools needed for implementing the practices(Chapter 4).
+    \item We give the overview of 2 different types of DevOps toolchain. We also implement demo prototypes for each type of toolchain and conduct experiments with these prototypes. The experiment result shows a comparison between different toolchains. It could help the team understand which toolchain cloud be selected based on the needs(Chapter 5).
 \end{itemize}
