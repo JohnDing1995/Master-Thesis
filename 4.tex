@@ -28,7 +28,19 @@ The continues delivery pipeline includes following steps:
     \item \textit{Test}: Automate testing with JUnit integrated in Gradle
     \item \textit{Artefact store}: Push the build artefacts to Artifactory
 \end{enumerate}
-To evaluate our assumption in \ref{assumption}, we have 2 setups. The first setup is a Jenkins server with traditional virtual machine as worker node. the second setup is the same Jenkins server but the worker nodes is dynamically provisioned in the AWS Fargate managed cloud service.
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{pics/jenkins-on-vm.png} % first figure itself
+    \end{minipage}\hfill
+    \begin{minipage}{0.54\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{pics/jenkins-on-fargate.png} % second figure itself
+    \end{minipage}
+    \caption{Architecture diagram of the test Jenkins cluster with agents running in traditional virtual machine (left) and on ECS with AWS Fargate (right)}
+\end{figure}
+To evaluate our assumption in \ref{assumption}, we have 2 different setups. The first setup Figure 4.1 (left) is a Jenkins server with traditional virtual machine as worker agents. In the second setup Figure 4.1 (right), we use the same Jenkins server but the worker nodes is dynamically provisioned in the AWS Fargate managed cloud service.
 
 // here write some more detail about the setup which includes IAM and hardware configuration, and also include the graph which shows the topological structure of 2 setups,
 
