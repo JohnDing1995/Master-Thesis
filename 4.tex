@@ -7,10 +7,12 @@ Our DevOps toolchain is used to conduct experiment that could answering 2 resear
 
 // Point out the problem, and point out the improvement can be done in the toolchain.
 
-\section{Cloud Services that improves our DevOps toolchain}
+\section{Cloud Services}
 \label{assumption}
+In this section, we will introduce several could services from CH3 that could be helpful to the DevOps toolchain. 
 //  Using services in AWS as example, Introduces how cloud services could improve. describe on services in one section
 \subsection{Managed Container Services for Distributed Builds} 
+
 // Describe how AWS Fargate could Help
 \subsection{Serverless computing}
 // Describe how AWS lambda could Help and why do we chose it
@@ -26,7 +28,7 @@ The continues delivery pipeline includes following steps:
     \item \textit{Pull from version control}: Pull the most recent change from Github repository
     \item \textit{Build}: Build the application with Gradle
     \item \textit{Test}: Automate testing with JUnit integrated in Gradle
-    \item \textit{Artefact store}: Push the build artefacts to Artifactory
+    \item \textit{Artefact store}: Push the build artifacts to Artifactory
 \end{enumerate}
 \begin{figure}[h]
     \centering
