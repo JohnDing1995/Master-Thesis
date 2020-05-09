@@ -48,10 +48,6 @@ The benefit of continuous delivery includes:\cite{WhatisCo47:online}\cite{fowler
     \item Short time before going to the market: The iteration of software development is much shorter. The automation in testing, deployment, environment confirmation included in the process, and the always read-to-deploy status shorten the time from development to market.
 \end{itemize}
 The continuous deployment is based on continuous delivery. The only difference is continuous deployment automates the deployment process. In continuous delivery, the software is deployable but not deploy without manual approval. In the continuous deployment, each change that passed automated build and testing will be deployed directly. The continuous deployment is a relatively new concept that most company not yet put the practice into production.\cite{leppanen2015highways} While continuous delivery is the required practice for the company to be DevOps and it is already being widely used.
-% \section{Infrastructure as Code}
-% The infrastructure is the software infrastructure and configuration needed for the software.
-% Infrastructure as code (in short IasC) as it says on its name. is to define the infrastructure with code, and using the tools in the software development to manages these codes which includes version control. \cite{artac2017devops}
-
 \section{DevOps}
 \begin{quotation}
     The fundamental goal of DevOps is to minimize the service overhead so that it can respond to change with minimal effort and deliver the maximum amount of value during its lifetime.
@@ -60,6 +56,7 @@ The continuous deployment is based on continuous delivery. The only difference i
     \end{flushright}
 \end{quotation}
 \subsection{Definition}
+\label{devops}
 DevOps is a set of practices that aims to combine different, traditionally separated disciplines (eg. software development, operations, QA, and others) in cross-functional teams with the help of automation of work to speed up software delivery without risking high-quality.\cite{bass2015devops}
 \par
 DevOps is the extension and evolution\cite{lwakatare2016relationship}\cite{leite2019survey} of Agile. DevOps and Agile both driven by the collaboration ideology and the adoption of DevOps needs Agile as the key factor.\cite{lwakatare2016relationship} DevOps has a different focus on agile. DevOps focus on the delivery while agile is focused on the development with the requirement and customer. Figure \ref{fig:DevOps}\cite{DevOpsin72:online} shows the workflow and practices of a team working under DevOps.
@@ -103,6 +100,7 @@ The main practices regarding Automation are the automated testing, continuous de
 \par
 The continuous delivery pipeline is the core of the DevOps.\cite{gill2018devops} As we discussed at \ref{CD}. The continuous delivery will ultimately automate all steps between the developer to commit the code to the product in the production.
 \par
+\label{iasc}
 The automation of the operation part is usually done by using the concept of "Infrastructure as Code"\cite{lwakatare2015dimensions}. The Infrastructure as Code (IasC) means to define everything in the software infrastructure level as code.\cite{artac2017devops} Because it is code, we could use the automation methodology used in the software development to manages and deploy these codes. According to Christof et. (2016), under IasC, infrastructure can be shared, tested, and version controlled. \cite{ebert2016devops} This could help emphasizes the automation within the operation scope. With the automation in operation, the team could be free from the tedious environment configuration and shorten the product development lifecycle. Automating server configuration means the developers and operation staff can equally know the server configuration \cite{DevOpsCu76:online} which help build the culture of shared responsibility and trust.
 \subsubsection[]{Monitoring}
 Monitoring is to continuously collect the matrices from the running system for helping the team find the problems in the system.
@@ -113,4 +111,29 @@ With monitoring, the software team could keep tracking the status, and maintain 
 For develop a high-quality monitoring system, the development of monitoring could be in parallel with the main product, and the monitoring system can be already be used against the "staging deployment" (see Figure \ref{fig:cicd}) at the early stage of the iteration. By this, the development team can improve the monitoring system continuously together with the main software system. The parallel development of the monitoring system and the main system helps the team to find the gap in the monitoring earlier.\cite{huttermann2012devops}
 \par
 On the other hand, As we mentioned in the "Culture" section, the collaboration is an important part of the DevOps culture. collaboration needs the communication and information sharing between the development(Dev) and operation(Ops) team. The monitoring could be one of the channels between the Dev and Ops since it can expose the information of the whole system which helps team members to understand the system as a whole. This helps the team achieving the point we mentioned at \ref{moniter} (Culture) that the project status and matrices should available to every team members.
-\subsection{DevOps Practices}
+\subsection{Toolchain}
+A DevOps toolchain is a set of tools that integrated together to aid the software development, deployment and management through the whole software development lifecycle, which helps the software development to fit the DevOps principles.\cite{DevOpsto7:online}\cite{Toolchai10:online}\cite{WhatisaD20:online} Each tool in the toolchain supports on specific activities in DevOps, for example, version control, build, testing.
+\par
+According to \cite{DevOpsSc0:online}\cite{WhatisaD20:online}, Google state of DevOps report \cite{The2019A93:online} and our previous definition of the DevOps, We summarize the essential component of a DevOps toolchain as Table \ref{tab:tools} below. 
+        \begin{longtabu} to \textwidth {|X[2,c]|X[7,c]|X[2,c]|}
+        \caption{An overview to the DevOps toolchain} \label{tab:tools} \\
+        
+        \hline \multicolumn{1}{|c|}{\textbf{Component}} & \multicolumn{1}{c|}{\textbf{Description}} & \multicolumn{1}{c|}{\textbf{Tools}} \\ \hline 
+        \endfirsthead
+        
+        \multicolumn{3}{c}%
+        {{\bfseries \tablename\ \thetable{} -- continued from previous page}} \\
+        \hline \multicolumn{1}{|c|}{\textbf{Component}} & \multicolumn{1}{c|}{\textbf{Description}} & \multicolumn{1}{c|}{\textbf{Tools}}
+        \\ \hline 
+        \endhead
+        \hline \multicolumn{3}{|r|}{{Continued on next page}} \\ \hline
+        \endfoot
+        \hline \hline
+        \endlastfoot
+        Project Management & Planning software development project, track the tickets and the issues, communication between and within the teams. The project management tools help to implement the DevOps culture, which enhances collaboration and knowledge sharing.\medskip & Slack, Jira, Trello, Asana \\\hline
+        Configuration Management & Provided a central platform to manage the configuration across the assets. This usually done by defining the desired state of the assets in a configure file and automate the configuration process which reaching the assets to the defined status.\medskip & Puppet, Chef, Ansible, 
+        SaltStack, UpGuard \\\hline
+        Version Control & Version control is the key component of DevOps toolchain. It is a system that could record and track the changes in a set of file overtime. Version control simplifies the collaboration between team members. and allow the simultaneous development on the different part of a software system According to \cite{Sourcean53:online} and \cite{stateofd0:online}, version control is the top practices when comes to improve the multiple metrics in DevOps. Version control becomes the indicator of the software system performance\cite{Sourcean53:online} Infrasturte as code, an important DevOps practise we mentioned at \ref{iasc} also relies on the version control.\medskip & GitHub, Gitlab, Bitbucket
+        \\\hline
+        Continuous Integration & Continuous integration (CI) is the top practice for improving the Deployment Frequency.\cite{stateofd0:online} It is one of the most important parts of DevOps toolchain. As we introduced at \ref{CD}, CI allows the developers to integrate their work more frequently to the production products, it shortens the time to the market of the product. The automatic testing and code analysis integrated into the CI continuously maintain the quality of the product. CI tools also automated the most parts of the software development pipeline, In conclusion, CI helps the system fulfil the DevOps definition (\ref{devops}) by speed up the delivery by automation, maintain the quality by continuous quality assurance. So CI is the core part of the whole DevOps toolchain.\medskip & Jenkins, Drone CI, Teamcity, GitLab CI/CD \\\hline
+    \end{longtabu}
