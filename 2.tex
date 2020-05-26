@@ -18,7 +18,7 @@ According to the Manifesto for Agile Software Development, compared with traditi
 \item Customer collaboration over contract negotiation.
 \item Responding to change over following a plan.
 \end{itemize}
-\section{CI/CD}
+\section{Continuous Integration \& Continuous Delivery}
 In the software development, CI/CD refers to continuous integration, continuous delivery and continuous deployment.\cite{Continuo67:online}. As we mentioned in \ref{agile}, agile software development requires continuous software quality assurance and iterative development. Currently, CI/CD is one set of the necessary practices for the team to become agile by achieving the requirements above. Figure \ref{fig:cicd} shows the relationship between these 3 practices.
 \begin{figure}[h]
     \centering
@@ -115,32 +115,29 @@ As we mentioned in the "Culture" section, the collaboration is an important part
 \subsection{Toolchain}
 A DevOps toolchain is a set of tools that integrated together to aid the software development, deployment and management through the whole software development lifecycle, which helps the software development to fit the DevOps principles.\cite{DevOpsto7:online}\cite{Toolchai10:online}\cite{WhatisaD20:online} Each tool in the toolchain supports on specific activities in DevOps, for example, version control, build, testing.
 \par
-According to \cite{WhatisaD20:online}, Google Cloud state of DevOps reports \cite{forsgrenaccelerate}\cite{velasquez2014state}\cite{forsgren20192019} and our previous definition of the DevOps, We summarize the essential component of a DevOps toolchain as Table \ref{tab:tools} below. 
-        \begin{longtabu} to \textwidth {|X[2,c]|X[7,c]|X[2,c]|}
-        \caption{An overview to the DevOps toolchain} \label{tab:tools} \\
-        
-        \hline \multicolumn{1}{|c|}{\textbf{Component}} & \multicolumn{1}{c|}{\textbf{Description}} & \multicolumn{1}{c|}{\textbf{Tools}} \\ \hline 
-        \endfirsthead
-        
-        \multicolumn{3}{c}%
-        {{\bfseries \tablename\ \thetable{} -- continued from previous page}} \\
-        \hline \multicolumn{1}{|c|}{\textbf{Component}} & \multicolumn{1}{c|}{\textbf{Description}} & \multicolumn{1}{c|}{\textbf{Tools}}
-        \\ \hline 
-        \endhead
-        \hline \multicolumn{3}{|r|}{{Continued on next page}} \\ \hline
-        \endfoot
-        \hline \hline
-        \endlastfoot
-        Project Management & Planning software development project, track the tickets and the issues, communication between and within the teams. The project management tools help to implement the DevOps culture, which enhances collaboration and knowledge sharing.\medskip & Slack, Jira, Trello, Asana \\\hline
-        Configuration Management & Provided a central platform to manage the configuration across the assets. This usually done by defining the desired state of the assets in a configure file and automate the configuration process which reaching the assets to the defined status.\medskip & Puppet, Chef, Ansible, 
-        SaltStack, UpGuard \\\hline
-        Version Control & Version control is the key component of DevOps toolchain. It is a system that could record and track the changes in a set of file overtime. Version control simplifies the collaboration between team members. and allow the simultaneous development on the different part of a software system According to \cite{Sourcean53:online} and \cite{velasquez2014state}, version control is the top practices when comes to improve the multiple metrics in DevOps. Version control becomes the indicator of the software system performance\cite{Sourcean53:online} Infrasturte as code, an important DevOps practise we mentioned at \ref{iasc} also relies on the version control.\medskip & GitHub, Gitlab, Bitbucket
-        \\\hline
-        Continuous Integration & Continuous integration (CI) is the top practice for improving the Deployment Frequency.\cite{velasquez2014state} It is one of the most important parts of DevOps toolchain. As we introduced at \ref{CD}, CI allows the developers to integrate their work more frequently to the production products, it shortens the time to the market of the product. The automatic testing and code analysis integrated into the CI continuously maintain the quality of the product. CI tools also automated the most parts of the software development pipeline, In conclusion, CI helps the system fulfil the DevOps definition (\ref{devops}) by speed up the delivery by automation, maintain the quality by continuous quality assurance. So CI is the core part of the whole DevOps toolchain.\medskip & Jenkins, Drone CI, Teamcity, GitLab CI/CD \\\hline
-        Monitoring & The monitoring system is one of the basic practices in a DevOps toolchain.\cite{forsgren20192019} It is also one of 4 basic elements of DevOps as we mentioned at \ref{moniter}. In the DevOps toolchain, the monitoring system detect the failure in the whole system and helps the software team finds the problems earlier. The log taking by the monitoring system can also record the system activity history which allows the further analysis. \medskip & Zabbix, Promethus \\\hline
-        Automated Testing & The automated testing tool could verify the code before it being build. Due the common practise of continuous integration which we mentioned at \ref{CD}, the automated testing usually integrated in the continuous integration/development pipeline. The integration of testing in CI pipeline makes it easy for organisation to implement the quality gate in the software development\cite{huttermann2012devops}. & Robot Framework, Selenium, JMeter
-    \end{longtabu}
-\section{Cloud Computing}
-In this section will will introduce several basic concepts related to Cloud Computing.
-We will have more discussion regarding to new cloud technologies in the next chapter.
+According to \cite{WhatisaD20:online}, Google Cloud state of DevOps reports \cite{forsgrenaccelerate}\cite{velasquez2014state}\cite{forsgren20192019} and our previous definition of the DevOps, We summarize the essential component of a DevOps toolchain as below.
+\subsubsection{Project Management \& Planning}
+Planning software development project, track the tickets and the issues, communication between and within the teams. The project management tools help to implement the DevOps culture, which enhances collaboration and knowledge sharing.\\
+\textbf{Tools:} Slack, Jira, Trello, Asana
+\subsubsection{Configuration Management}
+Provided a central platform to manage the configuration across the assets. This usually done by defining the desired state of the assets in a configure file and automate the configuration process which reaching the assets to the defined status.\\
+\textbf{Tools:} Puppet, Chef, Ansible
+\subsubsection{Continuous Integration}
+Continuous integration (in short: CI) is the top practice for improving the Deployment Frequency.\cite{velasquez2014state} It is one of the most important parts of DevOps toolchain. As we introduced at \ref{CD}, CI allows the developers to integrate their work more frequently to the production products, it shortens the time to the market of the product. The automatic testing and code analysis integrated into the CI continuously maintain the quality of the product. CI tools also automated the most parts of the software development pipeline, In conclusion, CI helps the system fulfil the DevOps definition (\ref{devops}) by speed up the delivery by automation, maintain the quality by continuous quality assurance. So CI is the core part of the whole DevOps toolchain.\\
+\textbf{Tools:} Jenkins, Drone CI, Teamcity, GitLab CI/CD
+\subsubsection{Version Control}
+Version control is the key component of DevOps toolchain. It is a system that could record and track the changes in a set of file overtime. Version control simplifies the collaboration between team members. and allow the simultaneous development on the different part of a software system According to \cite{Sourcean53:online} and \cite{velasquez2014state}, version control is the top practices when comes to improve the multiple metrics in DevOps. Version control becomes the indicator of the software system performance\cite{Sourcean53:online} Infrasturte as code, an important DevOps practise we mentioned at \ref{iasc} also relies on the version control.\\
+\textbf{Tools:} GitHub, Gitlab, Bitbucket
+\subsubsection{Monitoring}
+The monitoring system is one of the basic practices in a DevOps toolchain.\cite{forsgren20192019} It is also one of 4 basic elements of DevOps as we mentioned at \ref{moniter}. In the DevOps toolchain, the monitoring system detect the failure in the whole system and helps the software team finds the problems earlier. The log taking by the monitoring system can also record the system activity history which allows the further analysis.\\
+\textbf{Tools:} Zabbix, Promethus
+\subsubsection{Automated Testing}
+The automated testing tool could verify the code before it being build. Due the common practise of continuous integration which we mentioned at \label{CD}, the automated testing usually integrated in the continuous integration pipeline. The integration of testing in CI pipeline makes it easy for organisation to implement the quality gate in the software development. \cite{huttermann2012devops}
+\\
+\textbf{Tools:} Robot Framework, Selenium, JMeter
+
+\section{Serverless Computing}
+In this section will will introduce several basic concepts related to Serverless Computing.
+
+We will have more discussion regarding to new cloud service based on Serverless Computing in the next chapter.
 
