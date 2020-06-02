@@ -53,7 +53,6 @@ The continuous deployment is based on continuous delivery. The only difference i
         -- Markus Suonto, Senior DevOps Consultant, Eficode
     \end{flushright}
 \end{quotation}
-\subsection{Definition}
 \label{devops}
 DevOps is a set of practices that aims to combine different, traditionally separated disciplines (eg. software development, operations, QA, and others) in cross-functional teams with the help of automation of work to speed up software delivery without risking high-quality \cite{bass2015devops}.
 \par
@@ -135,8 +134,32 @@ The automated testing tool could verify the code before it being build. Due the 
 \textbf{Tools:} Robot Framework, Selenium, JMeter
 
 \section{Serverless Computing}
-In this section we focus on the concepts of Serverless Computing.
-
-
-We will have more discussion regarding to new cloud service based on Serverless Computing in the next chapter.
-
+In this section we focus on the concepts of Serverless Computing. We will have more discussion regarding to new cloud service based on Serverless Computing in the next chapter.
+\par
+Serverless Computing (in short: Serverless) is a cloud execution model which the sever and resources allocation is managed by the cloud provider. 
+The popularity of serverless is precipitated by the development of microservices and container technologies \cite{baldini2017serverless}. A survey from Cloud Native Computing Foundation (CNCF) shows that, in 2019, 41\% of respondents are using serverless technologies in the production, the number was 32\% in 2018\cite{cncf2020}. The report of this survey also shows that serverless architectures and cloud functions is being used by 3.3 million developers \cite{cncf2020} in 2019.
+\par
+In the traditional cloud computing service, the user rents the fixed number of cloud servers from the cloud providers, and the cloud providers charge user according to the renting length and the server type (pay-as-you-go model). While in the serverless computing services, the developer only pays according to the execution time of the program. 
+Another difference between serverless computing and traditional computing method is that, in serverless computing,  although the task is still runs on the physical cloud severs, the cloud servers is fully managed by the cloud providers. The means the user leave all server provisioning and administration tasks to the cloud providers \cite{jonas2019cloud} when using serverless.
+\subsection{History}
+In the early days of the cloud computing, the consideration behind the design of cloud computing is that, the developer simply move their deployment environment from local server to the server on cloud. Therefore, the cloud virtual machine, for example, Amazon Web Service EC2 is the main form of the cloud service providing. 
+After Amazon Web Service started offering the service with virtual machine, Google entered this field for competing with AWS, but in another direction.
+In year 2008, Google released Google App Engine (GAE) \footnote{https://cloud.google.com/appengine}\cite{zahariev2009google}. The platform allows developers run their code without managing the cloud virtual machine. This makes Google the first in the main cloud providers to allow the developer runs code on it's cloud without provisioning and managing the cloud servers. However, the GAE only allows developer run python code that are programmed with Google's own framework, rather than running arbitrary python code. 
+Amazon Web Service (AWS) introduces AWS Lambda in 2014, make Amazon the first public cloud provider that provides serverless computing platform\cite{Serverle77:online}. Since then the serverless computing starts it's rapid commercial development. Following AWS, other providers also introduced their own serverless computing platforms. Only in year 2016, Google \footnote{https://cloud.google.com/functions}, Microsoft \footnote{https://azure.microsoft.com/en-us/overview/serverless-computing/}, and IBM \footnote{https://www.ibm.com/cloud/functions} released their serverless computing platform respectively.
+\subsection{Characterises}
+We summarise 4 main characterises of serverless computing. 
+\subsubsection{Event Driven}
+Event Driven means the serverless applications is usually triggered and start running due to a event. There are different event that could be the trigger. The first one is the HTTP request. When a HTTP request reach the server, the serverless application could be triggered to reads the context of this request, execute the code, return the HTTP response to the frontend. This kind of pattern matched the nature of web application which allows the developer easily build serverless API for web/mobile applications on top of serverless cloud functions. The serverless application could also be triggered by changes in the database and object storage. This allow the serverless computing be used as background task such as data processing. A good example is the serverless computing use case of Thomson Reuters in their social media data analysis project\cite{ThomsonR38:online}. Thomson Reuters uses AWS Lambda to hosting serverless application that triggered when new data is stored. The application processes the data real-time, extract the hash tag trend data and store it in Amazon DynamoDB, an database solution by AWS, which is also serverless.
+\subsubsection{Managed Resources Allocation}
+The managed resources allocation means the developer only need to deploy the code but leaving the operation task to the cloud. As we mentioned before The developer doesn't need provisioning or managing any server besides, the developer is not required to install any software or runtime \cite{Serverle64:online} when deploying his/her own application. 
+\par
+The managed resources allocation also means the the cloud provider will manage the scaling of the infrastructure which the developers are running code on. In the traditional virtual machine, although some cloud providers for example AWS and Azure support auto scaling, however, the scaling policy has to be defined by the user. And the user need to set up the cloud infrastructure for using autoscaling. On the contrast, in Serverless computing, the cloud provider will handle everything related to auto scaling.
+Furthermore, the availability and security issues are being taken care by the cloud provider as well. 
+\subsubsection{Pay-per-use}
+Pay-per-use is the significant characteristic of serverless computing form non-technical perspective. The traditional cloud server using pay-as-you-go mode. The billing is done based on the type of VM and the rental time of this VM. This is not economy flexibly for the user since they have to pay even there is nothing running on the VM they are using, they still pay as the same as when their VM is fully loaded. On the contrast, in serverless computing, the users don't need to pay pay the idle time, they only pay for time that the application is running. In many scenario, such payment mode could lower the cost \cite{jonas2019cloud}.
+\subsubsection{Extensive Application Scenarios}
+The serverless computing has extensive application. The serverless runtime that what we discussed the most above. But beside deploy runtime on the cloud, serverless computing also gives you more possibilities which cover all backend services that we could be possibly used when build a modern application. According to the definition of Amazon Web Service, it's serverless offering not only include serverless functions (AWS Lambda) but also include serverless database, container runtime services, data analysis and Kubernetes cluster, which we already mentioned in the Chapter 1. Google cloud also advocates "full-stack serverless" \cite{Serverle29:online}. Same with AWS, Google Cloud also provides, all kinds of serverless solutions, from compute, DevOps storage, to AI and data analysis. Furthermore, Azure's serverless offering also covers wide range of the backend component, include computing, storage, ai, monitoring and analysis \cite{AzureSer56:online}.
+\subsection{Limitations}
+The serverless computing is not the perfect solution. In some aspects, it is still has it's limitations compared with traditional VMs.
+\subsubsection{Performance}
+This is mainly the problem within the compute  In the current serverless offering from cloud providers, the computation power of serverless computing 
