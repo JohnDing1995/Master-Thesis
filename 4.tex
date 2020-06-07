@@ -1,12 +1,24 @@
-\chapter{Implementation of DevOps Toolchain}
-In the chapter we introduce the implementation of our DevOps toolchain which act as the basic environment of our experiments. Then we introduce the experiment that for answering RQ1: \textbf{How could DevOps toolchain make use of current cloud services and how these services improves the DevOps toolchain.} In section 4.1 we introduce the implementation of our testing DevOps toolchain which is according to the DevOps definitions and DevOps practices we introduced at Chapter 2. In section 4.2 we discuss the cloud services selection consideration for the experiment. In section 4.3 we introduce the implementation of our experiments. Section 4.4 focuses on the experiment result.
-\section{DevOps Toolchain Implementation}
-Our DevOps toolchain is used to conduct experiment that could answering 2 research questions. As we mentions above, it include DevOps elements we introduced at CH2. In this section we will first introduce the composition of our DevOps toolchain, and secondly, which elements of DevOps does each components belongs to.
+\chapter{Design of DevOps Toolchain}
+In the chapter we introduce the design and implementation of our DevOps toolchain which acts as the environment of our experiments in CH5. The pipeline implementation is based on the DevOps elements we presented in Chapter 2. For conducting the experiment that answering RQ 2, we implement two different continuous delivery pipelines design with two set of tools respectively, one with tradition server based tool while another one with the serverless DevOps tools from AWS. We will introduce both design in this chapter as well.
 
-// Introduce our initial design of Devops toolchain
-
-// Point out the problem, and point out the improvement can be done in the toolchain.
-
+\section{Design of Server-based DevOps Toolchain}
+In section, we present our design of DevOps toolchain which based on virtual machine.
+\subsection{Architecture}
+Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. In here we only presenting architecture in a more general level. The detail architecture of each competent will Introduced in following sections, in both text and graph.
+\par
+When the developer pushed an new commit to the repository in GitHub \footnote{https://github.com/}, Github will send an HTTP POST request that contains necessary information to the Jenkins master node. Jenkins master which triggered by the HTTP request will create a new job for this project according to the information that the HTTP request contains. The job will first pull the latest code from git repository, then runs the docker containers with required build environment and build the project. In the end, an docker image for running the project will be created and be pushed to the container registry of AWS. Depends on the git branch that developer committed to, the project will be deployed to different development environment.
+\par
+As shows in Figure \ref{fig:archjenkins}, except version control, the whole environment is runs in Amazon Web Services, 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.99\textwidth]{pics/arch-med-jenkins.png}
+    \caption{Architecture diagram of our DevOps toolchain}
+    \label{fig:archjenkins}
+\end{figure}
+\subsection{Version Control}
+\subsection{Continuous Delivery Pipeline}
+\subsection{Monitoring}
+\section{Design of Serverless DevOps Toolchain}
 % \section{Cloud Services}
 % \label{assumption}
 % In this section, we will introduce several could services from CH3 that could be helpful to the DevOps toolchain. 
