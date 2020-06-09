@@ -1,6 +1,8 @@
 \chapter{Introduction}
 \label{chp:introduction}
-The Agile Manifesto \cite{beck2001manifesto} drafted by Kent Beck etc. in 2001 created the Agile software development method. Since then, this new software development method has draw attention to the industry and more and more companies started to apply Agile in the production.
+\justify{
+The Agile Manifesto \cite{beck2001manifesto} drafted by Kent Beck et al. in 2001 created the Agile software development method. Since then, this new software development method has drawn attention to the industry. The Agile has become a leading standard for the software development industry, with multiple further enhancements aiming to tackle certain business specific challenges.
+}
 The Agile method advocates the shorter development iteration, continuous development of software and continuous delivery of the software to the customer. The goal \cite{beck2001manifesto} of Agile is to satisfies customer with early and continuous delivery of the software.
 The Agile, which aims at the improvement of the process within the software development team and the communication between the development team and costumers \cite{miglierina2014application} do makes the software development faster. However, it doesn't emphasis the cooperation and communication between the development team and other teams. In real life, the conflict and lack of communication between the development team and operation teams usually become the barrier for shortening the delivery time of the software project.
 \par
@@ -21,10 +23,12 @@ Nowadays, the serverless computing services in AWS has already been expanded to 
 AWS also gains the most popularity among the developers that using serverless technologies. The most recent survey report \cite{cncf2020} from Cloud Native Computing Foundation (CNCF) shows that 51\% of serverless users are using AWS Lambda, while 68\% of developers who are not using Kubernetes are using AWS ECS to hosting their containers.
 As the Advanced AWS partner, AWS is being used as the main cloud providers in the customer projects by Eficode. And the company is keep looking for ways to leverage serverless computing services in AWS in order to benefit the DevOps toolchains it builds for costumers.
 \par
+However, despite the widely application of serverless technologies, and enormous number of research papers about the use-case or benefit of serverless in data analysis \cite{8457831}, for container-based microservices \cite{perez2018serverless}, or for IoT applications \cite{nastic2017serverless} \cite{glikson2017deviceless}, the benefit of serverless to DevOps is not yet be discussed. There do have paper \cite{ivanov2018implementation} or book \cite{bangera2018devops} about DevOps toolchain for serverless applications. Nerveless, there still lack of researches about how could serverless helps DevOps toolchain itself. Thus, our first research question is fill the gap by answering this question. 
+\par
 The second area we'd like to investigate in the project is related to the integrated toolchain which is powered by the tool-as-a-services in AWS.
 The integrated DevOps toolchain is delivered as a single platform that allows development teams to start using DevOps toolchain without the pain of having to choose, integrate, learn, and maintain a multitude of tools. While the traditional non-integrated toolchain is to have individual tools which are stand-alone and from different companies.
 \par
-This newly emerged type of toolchain is one of the new changes that cloud technologies bring, but it also leaves a question to the development team who trying to build DevOps toolchain on AWS: which kind of toolchain should they select? Should they stick on the previous non-integrated toolchain or embracing the integrated one? The integrated DevOps toolchain provides an out-of-box integrated solution for the whole DevOps lifecycle, which is tempting, but apart from the advertisement from the vendors of these "DevOps" platforms, It is still unclear if it is better than the traditional standalone toolchain. 
+This newly emerged type of toolchain is one of the new changes that serverless computing brings, but it also leaves a question to the development team who trying to build DevOps toolchain on AWS: which kind of toolchain should they select? Should they stick on the previous non-integrated toolchain or embracing the integrated one? The integrated DevOps toolchain provides an out-of-box integrated solution for the whole DevOps lifecycle, which is tempting, but apart from the advertisement from the vendors of these "DevOps" platforms, we still lack of third party researches about the comparisons between these two. Our second research question is to giving audience a better 
 % So another part of our research is a case study which compares these two kinds of toolchains on different metrics. This could give the software development team a better knowledge on which kind of toolchain suites them the best.
 \par
 Based on the above, the research questions could be summarised as below:
@@ -32,25 +36,15 @@ Based on the above, the research questions could be summarised as below:
     \item \textbf{RQ1:} How serverless computing services in Amazon Web Services helps the DevOps toolchain?
     \item \textbf{RQ2:} How does the newly emerged integrated toolchain compared with the stand-alone toolchain in Amazon Web Services?
 \end{enumerate}
-% DevOps strongly rely on tools. There are specialised tools exist for helping teams adopt different DevOps practices\cite{zhu2016devops}. There are different categories of tools used for different parts of the DevOps practice. For example, Jenkins for continuous integration, Ansible for process automation, sonarqube for code analysis, Slack for team communications etc. It could be interesting if we could investigate what kind of tools does it exist, and how those tools could help teams in DevOps different practice. The research could include how these tools could combine as well. 
-% \par 
-% Typically, the DevOps platform formulates the DevOps life cycle into the following stages:\cite{DevOps1016:online}
-% \begin{itemize}
-%     \item Build automation and continuous integration
-%     \item Test and verification
-%     \item Deployment
-%     \item Operation and monitoring 
-% \end{itemize}
-% Move below to CH3
-% \par
-% The deployment of toolchain could be on-premise, which means the software development team does the deployment and integration between the tools by themselves. This could: first, provides the maximum freedom for the team to choose the tools, and secondly, allow team customise the toolchain according to their needs. However, the downside is that the need for extra time for deployment and maintenance. Besides, the cost is hard to calculate and control. 
-\section{Research Method}
-To answer the RQ 1 we will first build a DevOps toolchain with the popular tools used in the industry. The toolchain will be deployed on Amazon Web Services (AWS) which is the cloud services used by Eficode. 
-So in the process of developing and deploy the toolchain, we will answer the RQ by research how could serverless computing in AWS benefit our toolchain. We will first conduct a literature review on new cloud technologies in chapter 3, in which we also introduce the implementation of these technologies by different cloud vendors. In this Chapter, we will also discuses which cloud technologies can benefit the DevOps toolchain. In the next step (chapter 4), we will design and conduct experiments which evaluating the benefit that each cloud technologies we researched in chapter 3 can bring. 
+\section{Research Approach}
+We will implement our toolchain based on the DevOps practices and tools used by Eficode. In the design and implementation of teh toolchain, we will focus on the following DevOps practices: Version Control, Continuous Delivery and Monitoring.
+To answer the RQ 1, we will first investigate the current serverless offering in Amazon Web Services (AWS) which is one of the cloud services mainly used in the Eficode. We will first analysis the functionality that each service have, and how does these services could be used by our DevOps toolchain that deployed in AWS. 
+Thus in the process of developing and deploy the toolchain, we could already partly answer the RQ1 doing case study on how the Serverless computing services be used in our DevOps toolchain. In addition how the serverless nature of these services could benefit the toolchain.
 \par
-The evaluation will be done by comparing the metrics measured from the toolchain with and without using certain cloud technologies from AWS. The metrics cover different perspectives includes cost, performance and development difficulties. We will also have the demo implementations which shows the answer to this research question.
+To further facilitate the result from last step, our next step of the study will be the case study on how serverless services in AWS helps our toolchain and the experiments.
+The experiments will be done by comparing the metrics measured from the toolchain with and without using certain serverless computing service from AWS. The metrics cover different perspectives includes cost, performance and development difficulties. We will also have the demo implementations which shows the answer to this research question.
 \par
-To answer RQ2, The standalone toolchain will be used to compare with the DevOps toolchain build by the DevOps tools provided by AWS as a services. We will conduct a case study on a comparison between an AWS based traditional toolchain and the out-of-box integrated DevOps toolchains also provided by AWS as services. The reason that we keep the comparison scope within AWS is that both 2 toolchain will be runs on the same hardware setup provided by AWS, this could eliminates the errors caused by the difference between vendors and focuses on the difference between toolchains.
+To answer RQ2, The standalone toolchain will be used to compare with the DevOps toolchain build by the DevOps tools provided by AWS as a services. We will conduct a case study on a comparison between an AWS based traditional toolchain and the out-of-box integrated DevOps toolchains also provided by AWS as services. The reason that we keep the comparison scope within AWS is that both 2 toolchain will be runs on the same hardware setup provided by AWS, this could eliminate the errors caused by the difference between vendors and focuses on the difference between toolchains.
 \par
 In the comparison, we will simulate the same DevOps lifecycle of a demo Spring Boot web app on both toolchains. We will again measure the metrics in these 2 toolchains, the process will be similar to what we will do on RQ1.
 For software development teams, it could provide better insights on how to select the DevOps toolchains.
