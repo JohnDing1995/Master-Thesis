@@ -1,14 +1,50 @@
 \chapter{Design of DevOps Toolchain}
-In the chapter, we introduce the design and implementation of our DevOps toolchain which acts as the environment of our experiments in CH5. The pipeline implementation is based on the DevOps elements we presented in Chapter 2. For experimenting that answering RQ 2, we implement two different continuous delivery pipelines design with two sets of tools respectively, one with tradition server-based tool while another one with the serverless DevOps tools from AWS. We will introduce both designs in this chapter as well.
-
-\section{Design of Server-based DevOps Toolchain}
-In section, we present our design of DevOps toolchain which based on the virtual machine.
+In the chapter, we will first present the case software project that will be built tested, and deployed by our DevOps toolchain. Then we introduce the design and implementation of our DevOps toolchain which acts as the environment of our experiments in CH5.
+\par
+For experimenting that answering RQ 2, we implement two different continuous delivery pipelines design with two sets of tools respectively, one with tradition non-integrated tool while another one with the serverless integrated DevOps tools from AWS. We will introduce both designs in this chapter as well.
+\section{Case Project}
+The case project is an example software project which will be used to test our implementation and run the experiments. This means we will simulate the DevOps development process of the case project on our DevOps toolchain. Although the type of our case project has no affect to our DevOps toolchain on the architecture level, the build dependencies and the software configuration inside our toolchain could be affected by it. Thus is necessary for us to have an introduction to the case project.
+\subsection{Programming Language and Framework Considerations}
+Java is the one of the most common language used in the commercial software development. According to TIOBE index of programming language \cite{indexTIO42:online}, Java is the most popular or the second most popular programming language in the world since mid-1990s. Besides commercial software development inside companies, Java programming language being widely used in the open-source software development. The report \cite{TheState3:online} from GitHub shows that Java ranks third most popular programming language in 2019, and it ranks second before 2018. Furthermore, Java has good versatility, which means it can be used in the development of almost every kinds of applications. For instance, Java could be used for developing web applications, desktop applications, in addition Java is the main development language for Android applications.
+\par
+To the DevOps point of view, Java programming language has a very complete ecosystem. This means there are tools for every phase of Java application development. These tools include build, code analysis, testing frameworks, artifact management, build automation \& dependency management et. These tools could be easily integrated together and act the part of the DevOps toolchain.
+\par
+Therefore, due to the popularity, versatility and complete ecosystem of Java programming language, we select Java as the language of the case project.
+\par
+One of the major application of Java is web development. Currently, 7 out of 10 \cite{Programm17:online} most popular website is using Java as web development language (sever side). In the field of web development, Spring framework is the most popular framework for Java and it's being used in many major internet companies include Google, Microsoft and Amazon \cite{SpringWh14:online}. 
+\par
+So, we choose Spring the framework to build our application. To develop our Spring application, we use Spring Boot\footnote{https://spring.io/projects/spring-boot}. Spring Boot is a project under Spring, which according to it's documentation, is to allow developer create Spring application with the minimal effort \cite{SpringBo84:online}, by simplify the configuration of Spring framework. 
+\subsection{Project Description}
+\begin{figure}[!h]
+    \begin{verbatim}
+        Method: GET
+        Endpoint: /packages
+        Success Response:
+            Code: 200
+            Content: 
+            [
+                {
+                    name : (Package name)
+                    description : (Package description)
+                    dependencies : (Dependencies) 
+               }
+            ]
+        Error Response:
+            Code: 500
+            Content: { msg: Server Error! }
+        \end{verbatim}
+        \label{fig:rest}
+\caption{RESTful API Interface of Case Project}      
+\end{figure}
+The case project is an simple REST API (Figure \ref{fig:rest}) which returns the info of all installed software packages in the host machine in JSON format when the frontend send a HTTP GET request to the backend.
+\section{Design of Non-integrated DevOps Toolchain}
+In section, we present our design of  DevOps toolchain which is non-integrated. Part of the components are still based on the virtual machine. Each section is the introduction to the design each component. We also present the consideration when select tool for this part of toolchain in each section. Besides, in each section, we introduce how could serverless computing be used by this component in general and the benefits to the specific tool we select.
 \subsection{Architecture}
-Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. In here we only presenting architecture on a more general level. The detailed architecture of each component will be introduced in the following sections, in both text and graph.
+The toolchain implementation is based on the DevOps elements we presented in Chapter 2, and the DevOps practise from Eficode. Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. In here we only presenting architecture on a more general level. The detailed architecture of each component will be introduced in the following sections, in both text and graph.
 \par
 When the developer pushes a new commit to the repository in GitHub \footnote{https://github.com/}, Github will send an HTTP POST request that contains the necessary information to the Jenkins master node. Jenkins master which triggered by the HTTP request will create a new job for this project according to the information that the HTTP request contains. The job will first pull the latest code from the git repository, then runs the docker containers with required build environment and build the project. In the end, a docker image for running the project will be created and be pushed to the container registry of AWS. Depends on the git branch that the developer committed to, the project will be deployed to a different development environment.
 \par
-As shown in Figure \ref{fig:archjenkins}, except version control, the whole environment is running in Amazon Web Services, 
+Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. We can see except version control, the whole environment is running in Amazon Web Services. Due to the limitation of space, the internal architecture of certain components is not shown in the graph, instead, we show them in the following sections.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.99\textwidth]{pics/arch-med-jenkins.png}
@@ -16,6 +52,7 @@ As shown in Figure \ref{fig:archjenkins}, except version control, the whole envi
     \label{fig:archjenkins}
 \end{figure}
 \subsection{Version Control}
+The case project 
 \subsection{Continuous Delivery Pipeline}
 \subsection{Monitoring}
 \section{Design of Serverless DevOps Toolchain}
