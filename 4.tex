@@ -40,20 +40,44 @@ The case project is an simple REST API (Figure \ref{fig:rest}) which returns the
 \section{Design of Non-integrated DevOps Toolchain}
 In section, we present our design of  DevOps toolchain which is non-integrated. Part of the components are still based on the virtual machine. Each section is the introduction to the design each component. We also present the consideration when select tool for this part of toolchain in each section. Besides, in each section, we introduce how could serverless computing be used by this component in general and the benefits to the specific tool we select.
 \subsection{Architecture}
-The toolchain implementation is based on the DevOps elements we presented in Chapter 2, and the DevOps practise from Eficode. Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. In here we only presenting architecture on a more general level. The detailed architecture of each component will be introduced in the following sections, in both text and graph.
-\par
-When the developer pushes a new commit to the repository in GitHub \footnote{https://github.com/}, Github will send an HTTP POST request that contains the necessary information to the Jenkins master node. Jenkins master which triggered by the HTTP request will create a new job for this project according to the information that the HTTP request contains. The job will first pull the latest code from the git repository, then runs the docker containers with required build environment and build the project. In the end, a docker image for running the project will be created and be pushed to the container registry of AWS. Depends on the git branch that the developer committed to, the project will be deployed to a different development environment.
-\par
-Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. We can see except version control, the whole environment is running in Amazon Web Services. Due to the limitation of space, the internal architecture of certain components is not shown in the graph, instead, we show them in the following sections.
-\begin{figure}[h]
+\begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.99\textwidth]{pics/arch-med-jenkins.png}
     \caption{Architecture diagram of our DevOps toolchain}
     \label{fig:archjenkins}
 \end{figure}
+The toolchain implementation is based on the DevOps elements we presented in Chapter 2, and the DevOps practise from Eficode. Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. In here we only presenting architecture on a more general level. The detailed architecture of each component will be introduced in the following sections, in both text and graph.
+\par
+When the developer pushes a new commit to the repository in GitHub \footnote{https://github.com/}, Github will send an HTTP POST request that contains the necessary information to the Jenkins master node. Jenkins master which triggered by the HTTP request will create a new job for this project according to the information that the HTTP request contains. The job will first pull the latest code from the git repository, then runs the docker containers with required build environment and build the project. In the end, a docker image for running the project will be created and be pushed to the container registry of AWS. Depends on the git branch that the developer committed to, the project will be deployed to a different development environment.
+
+\par
+Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. We can see except version control, the whole environment is running in Amazon Web Services. Due to the limitation of space, the internal architecture of certain components is not shown in the graph, instead, we show them in the following sections.
 \subsection{Version Control}
-The case project 
+Version Control System (VCS) is the process that record the changes in files set over time \cite{GitAbout93:online}, and versioning the history of these files. VSC is suitable for track the development progress and manges the goal within a software development team \cite{loeliger2012version}. Among all software for version control, Git is the most popular one nowadays. The survey \cite{CompareR31:online} from Synopsys shows that in 2019, 71\% of project today is using Git as it's versioning system while SVN that ranks in second only be used in 25\% of the projects. We use Git as the version control system since it is used by most of the software development teams nowadays. We use GitHub to hosting the case project. Github is the biggest preform in the world that hosting version controlled software project for free using Git. It provides interfaces with different DevOps related tools which makes it easy to be integrated into all kinds of DevOps toolchains.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.99\textwidth]{pics/git.png}
+    \caption{GitHub Workflow \cite{guides2013understanding}}
+    \label{fig:git}
+\end{figure}
+\par
+The Git flow \cite{driessen2010successful} proposed in 2010 is a successful workflow for working with Git. Git flow has already widely used and has been approved by the software industries. However, to better cope with the frequent release nature of DevOps, the Github workflow -- a simplified version of Git flow is proposed by GitHub.
+Therefore GitHub workflow \cite{chacongithub} is being chosen as the our workflow in the version control. The simplified version of this workflow is shown as in Figure \ref{fig:git}
+\par
+There are several general principals that followed by us when adapting GitHub flow, we refer the principals in \cite{chacongithub} for design our workflow.
+\begin{itemize}
+    \item Master branch is always deployable. This means when deploying the continues delivery pipelines in our toolchain, only the master branch can be deployed. And there shouldn't have any code which is not good to be deployed in the master branch. 
+    \item When work on new feature, make a new branch for this feature. The name of this branch should be descriptive which reflect the content of this feature. Commit the code related to this feature the this branch and push from this branch to the branch with the same name on the remote server (github.com).
+    \item Open an pull request\footnote{https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests} when the feature is ready to merge, or when you feel that you need help or comments from other team means on this feature. The code review is also done by others in the pull request.
+    \item When the code is already be reviewed and is good to be merged, the developer should merge the code to the master.
+    \item After the code of this feature is in the master, the code will and should be immediately deployed. There should not be any rollback in the master branch. If there are any issues within the new merged code, a new commit or a new branch should be made to fix the issue rather than rollback on the master.
+\end{itemize}
+\par
+Note that in our Git workflow, there are several time points that we need to run the continuous delivery pipeline within the toolchain. The continuous delivery pipeline will also varies with the time point within the version control workflow. We will introduce this in detail on \ref{our-ci}.
 \subsection{Continuous Delivery Pipeline}
+\label{our-ci}
+\subsubsection{Deployment}
+We using Martin Fowler's blue and green deployment strategy \cite{fowler2010bluegreendeployment}
 \subsection{Monitoring}
 \section{Design of Serverless DevOps Toolchain}
 % \section{Cloud Services}
