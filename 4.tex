@@ -1,6 +1,6 @@
 \chapter{Design of DevOps Toolchain}
-In the chapter, we will first present the case software project that will be build, tested, and deployed by our DevOps toolchain in the experiment. Then we introduce the design and implementation of our DevOps toolchain which acts as the basis of our experiments in CH5. Note that
-for the experiment that answering RQ 2, we implement two different continuous delivery pipelines design with two sets of tools respectively, one with tradition non-integrated tool while another one with the serverless integrated DevOps tools from AWS. In conclusion, we introduce the design of both toolchains(server-based and serverless), and explain how we come to this implementation in this chapter. 
+In the chapter, we will first present the case software project that will be built, tested, and deployed by our DevOps toolchain in the experiment. Then we introduce the design and implementation of our DevOps toolchain which acts as the basis of our experiments in CH5. Note that
+for the experiment that answering RQ 2, we implement two different continuous delivery pipelines design with two sets of tools respectively, one with tradition non-integrated tool while another one with the serverless integrated DevOps tools from AWS. In conclusion, we introduce the design of both toolchains(server-based and serverless) and explain how we come to this implementation in this chapter. 
 \section{Case Project}
 The case project is an example software project which will be used to test our implementation and run the experiments. This means we will simulate the DevOps development process of the case project on our DevOps toolchain. Although the type of our case project has no effect on our DevOps toolchain on the architecture level, the build dependencies and the software configuration inside our toolchain could be affected by it. Thus is necessary for us to have an introduction to the case project.
 \subsection{Programming Language and Framework Considerations}
@@ -48,7 +48,6 @@ In section, we present our design of  DevOps toolchain which is non-integrated. 
 The toolchain implementation is based on the DevOps elements we presented in Chapter 2, and the DevOps practises from Eficode. Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. In here we only presenting architecture on a more general level. The detailed architecture of each component will be introduced in the following sections, in both text and graph.
 \par
 When the developer pushes a new commit to the repository in GitHub \footnote{https://github.com/}, Github will send an HTTP POST request that contains the necessary information to the Jenkins master node. Jenkins master which triggered by the HTTP request will create a new job for this project according to the information that the HTTP request contains. The job will first pull the latest code from the git repository, then runs the docker containers with required build environment and build the project. In the end, a docker image for running the project will be created and be pushed to the container registry of AWS. Depends on the git branch that the developer committed to, the project will be deployed to a different development environment.
-
 \par
 Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. We can see except version control, the whole environment is running in Amazon Web Services. Due to the limitation of space, the internal architecture of certain components is not shown in the graph, instead, we show them in the following sections.
 \subsection{Version Control}
@@ -67,7 +66,7 @@ Several general principals followed by us when adapting GitHub flow, we refer th
 \begin{itemize}
     \item Master branch is always deployable. This means when deploying the continuous delivery pipelines in our toolchain, only the master branch can be deployed. And there shouldn't have any code which is not good to be deployed in the master branch. 
     \item When working on the new feature, make a new branch for this feature. The name of this branch should be descriptive which reflect the content of this feature. Commit the code related to this feature this branch and push from this branch to the branch with the same name on the remote server (github.com).
-    \item Open a pull request\footnote{https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests} when the feature is ready to merge, or when you feel that you need help or comments from other team means on this feature. The code review is also done by others in the pull request.
+    \item Open a pull request\footnote{https://help.github.com/en/GitHub/collaborating-with-issues-and-pull-requests/about-pull-requests} when the feature is ready to merge, or when you feel that you need help or comments from other team means on this feature. The code review is also done by others in the pull request.
     \item When the code is already be reviewed and is good to be merged, the developer should merge the code to the master.
     \item After the code of this feature is in the master, the code will and should be immediately deployed. There should not be any rollback in the master branch. If there are any issues within the newly merged code, a new commit or a new branch should be made to fix the issue rather than rollback on the master.
 \end{itemize}
@@ -75,9 +74,9 @@ Several general principals followed by us when adapting GitHub flow, we refer th
 Note that in our Git workflow, there are several time points that we need to run the continuous delivery pipeline within the toolchain. The continuous delivery pipeline will also vary with the time point within the version control workflow. We will introduce this in detail on \ref{our-ci}.
 \subsection{Continuous Delivery Pipeline}
 \label{our-ci}
-The most popular server-based tools for build continuous delivery pipeline are Jenkins\footnote{https://www.jenkins.io/}, Drone\footnote{https://drone.io/}, GoCD\footnote{https://www.gocd.org/} and Circle CI\footnote{https://circleci.com/}. An comparison between these tools is shown at Table \ref{tab:ci-tools}. As we can seen from the table, Jenkins is definitely the most popular option for CI/CD. Jenkins has wide application in the commercial use case, and the high popularity in the open-source community as well. Although compared with the other 3 newer tools, Jenkins is more focuses on the "Build" step within the continuous delivery p the     Drone is the most eye-catching open-source
-
-\begin{table}[]
+\subsubsection{Tool Selection Considerations}
+The most popular server-based tools for build continuous delivery pipeline are Jenkins\footnote{https://www.jenkins.io/}, Drone\footnote{https://drone.io/}, GoCD\footnote{https://www.gocd.org/} and Circle CI\footnote{https://circleci.com/}. A comparison between these tools is shown in Table \ref{tab:ci-tools}. As we can see from the table, Jenkins is the most popular option for CI/CD. Jenkins has wide application in the commercial use case, and the high popularity in the open-source community as well. Although compared with the other 3 newer tools, Jenkins is more focuses on the "Build" step within the continuous delivery pipeline. However, the open-source nature of Jenkins gives it a much wider selection of the plugin, which males Jenkins can be used for almost all steps in a continuous delivery pipeline. 
+\begin{table}[h]
     \begin{tabular}{|l|l|l|l|l|}
     \hline
                         & Jenkins & Drone & Circle CI & GoCD \\ \hline
@@ -94,7 +93,7 @@ The most popular server-based tools for build continuous delivery pipeline are J
       Free &
       \$35 user/month &
       Free \\ \hline
-    \begin{tabular}[c]{@{}l@{}}Number of companies\\ use it in the tech stack\tablefootnote{based on data from StackShare}\end{tabular} &
+    \begin{tabular}[c]{@{}l@{}}Number of companies\\use it in the tech stack\tablefootnote{based on data from StackShare}\end{tabular} &
       2634 &
       82 &
       1368 &
@@ -103,6 +102,21 @@ The most popular server-based tools for build continuous delivery pipeline are J
     \caption{Comparison of continuous delivery tools}
     \label{tab:ci-tools}
     \end{table}
+\par
+Created by Kohsuke Kawaguchi in 2001, Jenkins is an open-source continuous integrating tool write with Java.  It is suitable for a team of all sizes and varies of languages and technologies \cite{smart2011jenkins}. Furthermore, Jenkins also attracts software teams with it's easy-to-use and high extendibility \cite{smart2011jenkins} with thousand of the plugin. More plugin keeps coming since Jenkins has an active open-source community. These plugins help Jenkins keep up with the fast-developing DevOps practices, and help Jenkins integrate with the newly emerging tools and cloud services. The extendibility makes Jenkins still the most popular tool for DevOps toolchain even it's an aged software created when the term "DevOps" just appeared.
+\par
+Our continuous delivery pipeline is built with Pipeline plugin\footnote{https://www.jenkins.io/doc/book/pipeline/} in Jenkins. 
+Pipeline plugin allows us to define a continuous delivery pipeline as code in Jenkinsfile.
+In the pipeline, a conceptually distinct subset of tasks within the continuous delivery pipeline \cite{Pipeline85:online} is defined as a "stage"\footnote{For example, "Build", Test", "Deploy" step in a continuous delivery pipeline.} and each task within a step is called "step". Each pipeline is binding with a "project". An execution runtime of a project/pipeline is called "build" and the machine (virtual machine, container, etc.) for running the build is called "agent".
+\par
+Figure \ref{fig:pipeline} shows the workflow of a project going through our continuous delivery pipeline. The developer only commit to the feature branch. The pipeline runs after developer push local commits to Git. When the pipeline is triggered by the event on the feature branch, it only runs the first half. 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.99\textwidth]{pics/pipeline.png}
+    \caption{Continuous Delivery Pipeline in Our DevOps Toolchain}
+    \label{fig:pipeline}
+\end{figure}
+
 \subsubsection{Deployment}
 We using Martin Fowler's blue and green deployment strategy \cite{fowler2010bluegreendeployment}
 \subsection{Monitoring}
