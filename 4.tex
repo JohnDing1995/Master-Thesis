@@ -75,7 +75,7 @@ Note that in our Git workflow, there are several time points that we need to run
 \subsection{Continuous Delivery Pipeline}
 \label{our-ci}
 \subsubsection{Tool Selection Considerations}
-The most popular server-based tools for build continuous delivery pipeline are Jenkins\footnote{https://www.jenkins.io/}, Drone\footnote{https://drone.io/}, GoCD\footnote{https://www.gocd.org/} and Circle CI\footnote{https://circleci.com/}. A comparison between these tools is shown in Table \ref{tab:ci-tools}. As we can see from the table, Jenkins is the most popular option for CI/CD. Jenkins has wide application in the commercial use case, and the high popularity in the open-source community as well. Although compared with the other 3 newer tools, Jenkins is more focuses on the "Build" step within the continuous delivery pipeline. However, the open-source nature of Jenkins gives it a much wider selection of the plugin, which males Jenkins can be used for almost all steps in a continuous delivery pipeline. 
+The most popular server-based tools for build continuous delivery pipeline are Jenkins\footnote{https://www.jenkins.io/}, Drone\footnote{https://drone.io/}, GoCD\footnote{https://www.gocd.org/} and Circle CI\footnote{https://circleci.com/}. A comparison between these tools is shown in Table \ref{tab:ci-tools}. As we can see from the table, Jenkins is the most popular option for CI/CD. Jenkins has wide application in the commercial use case, and the high popularity in the open-source community as well. Although compared with the other 3 newer tools, Jenkins is more focuses on the "Build" step within the continuous delivery pipeline. However, the open-source nature of Jenkins gives it a much wider selection of the plugin, which means Jenkins can be used for almost all steps in a continuous delivery pipeline. 
 \begin{table}[h]
     \begin{tabular}{|l|l|l|l|l|}
     \hline
@@ -108,16 +108,37 @@ Created by Kohsuke Kawaguchi in 2001, Jenkins is an open-source continuous integ
 Our continuous delivery pipeline is built with Pipeline plugin\footnote{https://www.jenkins.io/doc/book/pipeline/} in Jenkins. 
 Pipeline plugin allows us to define a continuous delivery pipeline as code in Jenkinsfile.
 In the pipeline, a conceptually distinct subset of tasks within the continuous delivery pipeline \cite{Pipeline85:online} is defined as a "stage"\footnote{For example, "Build", Test", "Deploy" step in a continuous delivery pipeline.} and each task within a step is called "step". Each pipeline is binding with a "project". An execution runtime of a project/pipeline is called "build" and the machine (virtual machine, container, etc.) for running the build is called "agent".
+
 \par
-Figure \ref{fig:pipeline} shows the workflow of a project going through our continuous delivery pipeline. The developer only commit to the feature branch. The pipeline runs after developer push local commits to Git. When the pipeline is triggered by the event on the feature branch, it only runs the first half. 
+For the build stage within Jenkins pipeline, we use Gradle\footnote{https://gradle.org/} as the build tool. 
+Gradle is a powerful build tool initially designed for JVM based language, but now it also supports other programming languages, for example, C++ and Python. Like Jenkins, Gradle also has a dynamic ecosystem with thousands of plugin. This enables the possibility to use different kinds of tools such as unit testing and code analysis within a single pipeline of Gradle. Gradle also makes the dependency management easy, dependencies could be easily added to the project by editing the Gradle configure file of the project. Furthermore, Gradle supports configuration as code. This allows developers to define all of the build configurations of a software project in a single file.
+\par
+For unit testing within the build stage, we using JUnit \footnote{https://junit.org/junit5/} as the tool for testing. For code analysis, we use SonarQube\footnote{https://www.sonarqube.org/}. Both are one of the most common used tools in their specialized field in the Java ecosystem. And both tools have official Gradle plugin which allows us easily use them with Gradle. 
+\par
+We will widely use Docker \footnote{https://www.docker.com/} our pipeline.  Docker is an open-source software which could pack, deliver and run the software as a container. A container is an isolated unit that includes the application and all its dependencies which allow application runs in the same way regardless of the host environment \cite{WhatisaC60:online}. A container is the running instance of a Docker image that defined by Dockerfile.
+\par    
+There will be 2 main use cases of Docker. Firstly, we run the build stage within the container. To build the case application, the host machine needs to have JVM installed. However, we want to make our pipeline not only suitable for Java application but also easily be used to build an application in other programming languages. Docker solves this problem by provides good isolation from the host machine. Therefore we can configure the built environment (operating system version, dependencies) runs within Docker container by simply editing the Dockerfile without actually install anything on the host machine.
+\par
+After Build stage, we use Docker to Dockerize our application which creates a Docker image of our application.
+Docker allows us to specify all system dependencies in a single file (Dockerfile), so there is no need to have any Java environment pre-installed in the deployment environment which runs our application. This is because all environment is already being packed in our Docker image. By doing this, firstly, we reduce the operational effort. Secondly, we improve compatibility since docker makes sure that the docker image could runs in the same behaviour no matter what host machine it runs on. Also, all major cloud computing providers support Docker. We could easily run the container from our Docker image on their VM and they're serverless computing services. This means our Dockerized application could easily be cloud-native and be deployed across a multi-cloud environment.
+\subsubsection{Pipeline Workflow}
+Figure \ref{fig:pipeline} shows the workflow of a project that goes through our continuous delivery pipeline.
+We can see when the pipeline is triggered by the event on the feature branch, it only runs through the first 2 stages. This is because according to the practices of continuous integration mentioned by us in \ref{CD} and by Martin Fowler in \cite{fowler2006continuous}, a developer should merge(the "integration" in continuous integration) his/her work couple times per day. Therefore the whole pipeline will run the code with this new feature at least several times a day. This already ensures the code could frequently be tested and deployed into the test environment. Thus, in the pipeline runs after the push to the feature branch the further steps could be skipped. 
+\par
+ The developer only commits to the feature branch. The pipeline runs first 2 stages after a developer pushes local commits to Git. It first pulls the newly pushed code, and then build. In the build stage, the code first is analysed, then we do unit testing to make sure the code could pass the test cases defined by the developer during development. In the end, the code will be built into Java ARchive file (.jar). The purpose of putting code analysis step first is that the code analysis will check syntax error and bugs. We want to make sure the code is runnable and no syntax error before put it into the build. So we can reduce the cost by reducing pipeline running time if there is error exists in the code. 
+
+\par
+After all the above steps are done and no error returns, the developer can open a pull request view the code change and ready to merge the code to the dev branch. Before the merge, the pull request needs to pass the code review by another developer. This is to make sure that the automated tests don't miss any bugs. After the code review passed, the reviewer or the developer him/herself merge the code to the dev branch.  
+\par
+After the code merged to the dev branch, the pipelines run again, this time it runs the whole pipeline. First, the pipeline executes the first two stages as in the feature branch. Now we have the Java ARchive file. The Java ARchive is an executable package of our Spring Boot application. Next step is to Dockerizing our application which generates the Docker image our application.
+\par
+
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.99\textwidth]{pics/pipeline.png}
-    \caption{Continuous Delivery Pipeline in Our DevOps Toolchain}
+    \caption{The Workflow of Continuous Delivery Pipeline in Our DevOps Toolchain}
     \label{fig:pipeline}
 \end{figure}
-
-\subsubsection{Deployment}
 We using Martin Fowler's blue and green deployment strategy \cite{fowler2010bluegreendeployment}
 \subsection{Monitoring}
 \section{Design of Serverless DevOps Toolchain}
