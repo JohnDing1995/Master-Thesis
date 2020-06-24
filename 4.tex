@@ -75,6 +75,7 @@ Note that in our Git workflow, there are several time points that we need to run
 \subsection{Continuous Delivery Pipeline}
 \label{our-ci}
 \subsubsection{Tool Selection Considerations}
+\textit{Continuous Delivery Pipeline}\\
 The most popular server-based tools for build continuous delivery pipeline are Jenkins\footnote{https://www.jenkins.io/}, Drone\footnote{https://drone.io/}, GoCD\footnote{https://www.gocd.org/} and Circle CI\footnote{https://circleci.com/}. A comparison between these tools is shown in Table \ref{tab:ci-tools}. As we can see from the table, Jenkins is the most popular option for CI/CD. Jenkins has wide application in the commercial use case, and the high popularity in the open-source community as well. Although compared with the other 3 newer tools, Jenkins is more focuses on the "Build" step within the continuous delivery pipeline. However, the open-source nature of Jenkins gives it a much wider selection of the plugin, which means Jenkins can be used for almost all steps in a continuous delivery pipeline. 
 \begin{table}[h]
     \begin{tabular}{|l|l|l|l|l|}
@@ -108,39 +109,75 @@ Created by Kohsuke Kawaguchi in 2001, Jenkins is an open-source continuous integ
 Our continuous delivery pipeline is built with Pipeline plugin\footnote{https://www.jenkins.io/doc/book/pipeline/} in Jenkins. 
 Pipeline plugin allows us to define a continuous delivery pipeline as code in Jenkinsfile.
 In the pipeline, a conceptually distinct subset of tasks within the continuous delivery pipeline \cite{Pipeline85:online} is defined as a "stage"\footnote{For example, "Build", Test", "Deploy" step in a continuous delivery pipeline.} and each task within a step is called "step". Each pipeline is binding with a "project". An execution runtime of a project/pipeline is called "build" and the machine (virtual machine, container, etc.) for running the build is called "agent".
-
-\par
+\medskip
+\\
+\textit{Build \& Test Automation Tool}\\
 For the build stage within Jenkins pipeline, we use Gradle\footnote{https://gradle.org/} as the build tool. 
 Gradle is a powerful build tool initially designed for JVM based language, but now it also supports other programming languages, for example, C++ and Python. Like Jenkins, Gradle also has a dynamic ecosystem with thousands of plugin. This enables the possibility to use different kinds of tools such as unit testing and code analysis within a single pipeline of Gradle. Gradle also makes the dependency management easy, dependencies could be easily added to the project by editing the Gradle configure file of the project. Furthermore, Gradle supports configuration as code. This allows developers to define all of the build configurations of a software project in a single file.
 \par
 For unit testing within the build stage, we using JUnit \footnote{https://junit.org/junit5/} as the tool for testing. For code analysis, we use SonarQube\footnote{https://www.sonarqube.org/}. Both are one of the most common used tools in their specialized field in the Java ecosystem. And both tools have official Gradle plugin which allows us easily use them with Gradle. 
-\par
-We will widely use Docker \footnote{https://www.docker.com/} our pipeline.  Docker is an open-source software which could pack, deliver and run the software as a container. A container is an isolated unit that includes the application and all its dependencies which allow application runs in the same way regardless of the host environment \cite{WhatisaC60:online}. A container is the running instance of a Docker image that defined by Dockerfile.
+\medskip
+\\
+\textit{Docker}\\
+We will widely use Docker \footnote{https://www.docker.com/} in our pipeline.  Docker is an open-source software which could pack, deliver and run the software as a container. A container is an isolated unit that includes the application and all its dependencies which allow application runs in the same way regardless of the host environment \cite{WhatisaC60:online}. A container is the running instance of a Docker image that defined by Dockerfile.
 \par    
-There will be 2 main use cases of Docker. Firstly, we run the build stage within the container. To build the case application, the host machine needs to have JVM installed. However, we want to make our pipeline not only suitable for Java application but also easily be used to build an application in other programming languages. Docker solves this problem by provides good isolation from the host machine. Therefore we can configure the built environment (operating system version, dependencies) runs within Docker container by simply editing the Dockerfile without actually install anything on the host machine.
+\label{docker}
+There will be 2 main use cases of Docker in our toolchain. Firstly, we run the build stage within the container. To build the case application, the host machine needs to have JVM installed. However, we want to make our pipeline not only suitable for Java application but also easily be used to build an application in other programming languages. Docker solves this problem by provides good isolation from the host machine. Therefore we can configure the built environment (operating system version, dependencies) runs within Docker container  without actually install anything on the host machine by simply editing the Dockerfile.
 \par
-After Build stage, we use Docker to Dockerize our application which creates a Docker image of our application.
+We also use Docker to Dockerize our application which creates a Docker image of our application.
 Docker allows us to specify all system dependencies in a single file (Dockerfile), so there is no need to have any Java environment pre-installed in the deployment environment which runs our application. This is because all environment is already being packed in our Docker image. By doing this, firstly, we reduce the operational effort. Secondly, we improve compatibility since docker makes sure that the docker image could runs in the same behaviour no matter what host machine it runs on. Also, all major cloud computing providers support Docker. We could easily run the container from our Docker image on their VM and they're serverless computing services. This means our Dockerized application could easily be cloud-native and be deployed across a multi-cloud environment.
+\subsubsection{Pipeline OverView}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{pics/overview.png}
+    \caption{The Stages and Distributed Build in Our Pipeline}
+    \label{fig:overview}
+\end{figure}
+Figure \ref{fig:overview} shows the 5 stages in our pipeline that shown in the Jenkins dashboard. The bottom part of this Figure shows the task distribution between master node and agent nodes. 
+As we can see from the figure, when the master node start a job, it will create Docker container in AWS Fargate as agent. The agent will pull codes from VCS, build the code, and then send the build artifacts back to master node. After this the container will be terminated. The master node will continue executes the rest steps.
+\par
+The considerations behind to our design is that, the first 2 steps takes most of time in our pipeline and according to Figure \ref{fig:pipeline} runs more frequently than other steps \footnote{The reason will be discussed in next section "Pipeline Workflow"}. The running time will be further extended when building larger project. These 2 stage will be the bottleneck of the pipeline if we have it on the master mode. So we need to offload these steps to Jenkins agents for better performance.
+\par
+The second reason is: as we mentioned in our introduction of Docker at \ref{docker}, the build environment inside Jenkins agents that runs in Docker container is easier to be changed. When the team want to build the same code for different OS (Which happens in C/C++ development) or want to have different build environment for different projects, they eliminates tasks such as configuration and installation different environment thanks to Docker. Instead, they can just modify the Dockerfile that defines the Docker image of the Jenkins agents.
+\par
+We also notice that the Deploy stage also takes long time. However, we don't have it in the distributed build because: first, it is on the end of a pipeline so it will not block te further steps, second, the pipeline runs ths stage less frequently than first 2 stages as shows in Figure \ref{fig:pipeline}, thus there will be less possibility that there are many jobs runs at "Deploy" stage in parallel.
 \subsubsection{Pipeline Workflow}
 Figure \ref{fig:pipeline} shows the workflow of a project that goes through our continuous delivery pipeline.
 We can see when the pipeline is triggered by the event on the feature branch, it only runs through the first 2 stages. This is because according to the practices of continuous integration mentioned by us in \ref{CD} and by Martin Fowler in \cite{fowler2006continuous}, a developer should merge(the "integration" in continuous integration) his/her work couple times per day. Therefore the whole pipeline will run the code with this new feature at least several times a day. This already ensures the code could frequently be tested and deployed into the test environment. Thus, in the pipeline runs after the push to the feature branch the further steps could be skipped. 
 \par
  The developer only commits to the feature branch. The pipeline runs first 2 stages after a developer pushes local commits to Git. It first pulls the newly pushed code, and then build. In the build stage, the code first is analysed, then we do unit testing to make sure the code could pass the test cases defined by the developer during development. In the end, the code will be built into Java ARchive file (.jar). The purpose of putting code analysis step first is that the code analysis will check syntax error and bugs. We want to make sure the code is runnable and no syntax error before put it into the build. So we can reduce the cost by reducing pipeline running time if there is error exists in the code. 
-
 \par
-After all the above steps are done and no error returns, the developer can open a pull request view the code change and ready to merge the code to the dev branch. Before the merge, the pull request needs to pass the code review by another developer. This is to make sure that the automated tests don't miss any bugs. After the code review passed, the reviewer or the developer him/herself merge the code to the dev branch.  
+If all the above steps are done and no error returns, the developer can open a pull request view the code change and ready to merge the code to the dev branch. Before the merge, the pull request needs to pass the code review by another developer. This is to make sure that the automated tests don't miss any bugs. After the code review passed, the reviewer or the developer him/herself merge the code to the dev branch.  
 \par
-After the code merged to the dev branch, the pipelines run again, this time it runs the whole pipeline. First, the pipeline executes the first two stages as in the feature branch. Now we have the Java ARchive file. The Java ARchive is an executable package of our Spring Boot application. Next step is to Dockerizing our application which generates the Docker image our application.
+After the code merged to the dev branch, the pipelines run again, this time it runs the whole pipeline. First, the pipeline executes the first two stages as in the feature branch. Now we have the Java ARchive file. The Java ARchive is an executable package of our Spring Boot application. Next step is to Dockerizing our application which generates the Docker image our application, and then we push the image to the Amazon Elastic Container Registry AWS (AWS ECR) for further use.
 \par
-
+\label{deploy}
+The last step of the pipeline is deployment, the pipeline pull image in ECR that we pushed in the last stage, and then deploy it to the deployment environment. In our case, we using AWS Elastic Container Service (ECR) on AWS Fargate to host our application. As we mentioned in the CH3, it allow us to run our containerized application without having to manage servers. So it is easier for us to make an functionality complete DevOps toolchain implementation compared with server based deployment environment, for example AWS Elastic Kubernetes Service (EKS). 
+During deployment we use Martin Fowler's blue and green deployment strategy \cite{fowler2010bluegreendeployment} which is natively supported by ECS. This means when a new deployment comes, the older version will continue serving until the newer version reach the stable status. This could significantly reduces the downtime in the deployment. 
+\par
+In the dev branch, we deploy the application to the staging environment. The deployment to staging environment should be automate, this is because the staging environment is only for testing, and only visible within the team. 
+In the staging environment, we will conduct API smoke testing \cite{Smoketes27:online}. This is for test if our deployed API works and if it works as expected. If the deployed function passes the smoke test, this shows the deployment works as expected and ready for the deployment. The developer could now open an pull request, merge code to master branch. The pipeline will runs again, and deploy the application to the production environment which is visible to the costumers.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.99\textwidth]{pics/pipeline.png}
     \caption{The Workflow of Continuous Delivery Pipeline in Our DevOps Toolchain}
     \label{fig:pipeline}
 \end{figure}
-We using Martin Fowler's blue and green deployment strategy \cite{fowler2010bluegreendeployment}
+
+% \subsection{Smoke Testing}
+% Testing is an implement component within the DevOps pipeline
+% In this section, we further discuses about the smoke testing that we mentioned in the \ref{deploy}.
 \subsection{Monitoring}
+Monitoring is one of the important component in the DevOps toolchain. Different with testing which usually integrated with the continuous delivery pipeline, the monitoring is independent from the pipeline. Usually monitoring is not act as one step within the continuous delivery pipeline but as an independent component.
+\par
+In CH3 we introduced AWS cloudwatch as one of the serverless service in AWS. In our toolchain, we will use it as the primary tool for monitoring. Wih Cloudwatch, we not only can get the realtime log from our deployed container in the ECS, but also the quantitative data for example memory utilization and network i/o, the monitoring dashboard can be seem at figure \ref{fig:monitoring}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.70\textwidth]{pics/monitoring.png}
+    \caption{The Stages of our Pipeline Shown in Jenkins Dashboard}
+    \label{fig:monitoring}
+\end{figure}
+Another service we introduced in CH3 is AWS lambda. It is the most important serverless service in AWS. We also discussed how could it be used in our DevOps toolchain in which monitoring is one of the use cases. In our monitoring system, AWS lambda is used as an extension for cloud watch. 
 \section{Design of Serverless DevOps Toolchain}
 % \section{Cloud Services}
 % \label{assumption}
