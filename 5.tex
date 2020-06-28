@@ -24,7 +24,7 @@ As we described in Chapter 4, the continuous delivery pipeline includes the foll
 \par
 In these 4 steps, the step "Build" and "Checkout" is being done in parallel within the ECS cluster. As we mentioned in CH4, when the new job started in the Jenkins master server, Jenkins will provision a new container instance within the ECS cluster. The container is managed directly by AWS, so we don't need to create and manage the virtual machine that runs the container. We use this setup in our initial implementation as the control group.
 \par
-In the experimental group, we replace AWS Fargate with traditional VM, which is EC2 in the Amazon Web Services. We manually create EC2 virtual machines and let Jenkins runs the same continuous delivery pipeline on it. The parallelization pattern remains the same, this means as in the control group, only the first two steps are being run distributively in the Jenkins nodes.
+In the experimental group, we replace AWS Fargate with traditional VM, which is EC2 in the Amazon Web Services. The parallelization pattern remains the same, this means as in the control group, only the first two steps are being run distributively in the Jenkins nodes. The EC2 instances belongs to a auto scaling group that will scale up when CPU Utilization rate reach 70\%. The initial size for auto scaling group is 1
 \par
 Figure \ref{fig:ex1} shows the architecture of 2 groups in this experiment. The experimental group on the left is a Jenkins server with the traditional virtual machine as workers node that hosting the container agent. The architecture of the control group on the right has agent nodes dynamically provisioned as serverless containers hosed by AWS Fargate.
 \begin{figure}[h]
@@ -41,23 +41,59 @@ Figure \ref{fig:ex1} shows the architecture of 2 groups in this experiment. The 
     \caption{Architecture diagram of the test Jenkins cluster with agents running in traditional virtual machines (left) and on ECS with AWS Fargate (right)}
 \end{figure}
 \subsubsection{Hardware}
-The hardware of Jenkins agents is the independent variable that exposed to the change in the experiment.
+The hardware of the instance that runs Jenkins agents is the independent variable that exposed to the change in the experiment.
 \par
-The experiments are conducted on Amazon Web Services (AWS). The hardware of Jenkins master node in both experiment groups is the same, which is EC2 instance of type t3.medium with 2 virtual CPU, 4 GB RAM and 30 GB disk. The EC2 instances as worker node is type t3.small, with 2 virtual CPU and 2GB RAM. Each worker has 2 Jenkins executer according to the Jenkins default setting. This means 2 containers could run in parallel on each EC2 virtual machine.
+The experiments are conducted on Amazon Web Services (AWS). The hardware of Jenkins master node in both experiment groups is the same, which is EC2 instance of type t3.medium with 2 virtual CPU, 4 GB RAM and 30 GB disk. The EC2 instances as worker node is type t3.small, with 2 virtual CPU and 2GB RAM. Each EC2 instance can run 1 container at the same time.
 \par
-In the control group, which is the implementation we presented in CH4, the Jenkins agents run on AWS ECS powered by AWS Fargate. The virtual hardware resources that are allocated to each serverless container is 1 virtual CPU, and 1 GB of RAM. This makes sure that each container shares the same hardware resources as in another group, so the hardware will not affect the result.
+In the control group, which is the implementation we presented in CH4, the Jenkins agents run on AWS ECS powered by AWS Fargate. The virtual hardware resources that are allocated to each serverless container is 2 virtual CPU, and 2 GB of RAM. This makes sure that each container shares the same hardware resources as in another group, so the hardware will not affect the result.
 \subsubsection{Software}
-We maintain the same software setup in each group. The operation System for EC2 instance that runs Jenkins master node is Ubuntu Server 18.04. The version of Jenkins that runs on the server is 2.222.3. For connect ECS and Fargate which works as the Jenkins agents, we use Jenkins plugin "Amazon Elastic Container Service (ECS) / Fargate", version 1.34. The container in Fargate/EC2 for running the Checkout and Build steps is from our developed docker image which you can find at \footnote{https://hub.docker.com/r/dry1995/jnlp}. The docker image includes essential dependencies that will be used to build the Spring Boot application and the base image which allow container connects Jenkins master as an agent. The "Build" step in our pipeline uses Gradle (version: 6.2.1) as the build tool for the application, the automated testing and code analysis is being integrated with this step, and being conducted by plugins of Gradle.
+We maintain the same software setup in each group. The operation System for EC2 instance that runs Jenkins master node is Ubuntu Server 18.04. The version of Jenkins that runs on the server is 2.222.3. For connect ECS and Fargate which works as the Jenkins agents, we use Jenkins plugin "Amazon Elastic Container Service (ECS) / Fargate", version 1.34. The container in Fargate/EC2 for running the Checkout and Build steps is from our developed docker image which you can find at \footnote{https://hub.docker.com/r/dry1995/jnlp}. The docker image includes essential dependencies that will be used to build the Spring Boot application and the base image which allow container connects Jenkins master as an agent. The "Build" step in our pipeline uses Gradle (version: 6.2.1) as the build tool for the application, the automated testing and code analysis is being integrated with this step, and being conducted by plugin of Gradle.
 
 \par
-To shows how does the 2 setups performance within the teams with different sizes, we run by run the different number of tasks parallel through the pipeline. This simulates the different team size, besides, it could also show the scalability when comes to the need for task parallelization in bigger organizations.
+To shows how does the 2 setups performance within the teams with different sizes, we run by run the different number of tasks parallel through the pipeline. This simulates the different team size that  and show the scalability when comes to the need for task parallelization in bigger organizations.
 
 \subsection{Performance Properties and Evaluation}
 We run the pipeline through 2 different setups, we will get the result of the following properties:
 \begin{itemize}
-    \item \textit{Runtime} describes the total time for finishing all the tasks.
+    \item \textit{Runtime} describes the total time for finishing all the jobs. If the jobs runs in parallel, the runtime is from start of jobs until the end of the last finished job.
     \item \textit{Cost Structure} describes the daily cost of 2 setups under the same workload, within the same period.
     \item \textit{Resource Utilization} describes the average CPU/RAM usage for each instance during a single run of the pipeline.
 \end{itemize}
 \subsection{Result}
-//Here shows the result of the experiment
+Here shows the result of this experiment.
+\subsubsection{Runtime}
+We first compare the runtime of these 2 setups. Except test the runtime of single job runs with two setups respectively, we also test the runtime of each pipeline setup under different number jobs executed in parallel. The test result is depicted in Figure \ref{fig:runtime}.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.99\textwidth]{pics/runtime.png}
+    \caption{Runtime of Pipeline with Different Jenkins Agents}
+    \label{fig:runtime}
+\end{figure}
+\par
+The test result shows that, when comes to the execution of single task. The traditional VM has faster delivery speed over serverless solution (AWS Fargate). However, with the number of jobs that run in parallel increases, the total runtime on the traditional VM decrease. On the contract, on serverless solution(Fargate), the runtime remains almost the same.
+\par
+We analyse the reason behind this result, we found out that the longer runtime with the single job on Fargate is because the longer starting time of Jenkins agent. In EC2, the Jenkins will simply provision a Docker container within EC2 VM, and connect to the Jenkins master node. However in Fargate, the Jenkins can only connect to agent once AWS finishes the initialization of underlay infrastructure that runs the serverless container. This takes significantly longer time. This shows the one of the limitation of serverless computing (cold-start) that we mentioned in \ref{servlesslimitation}.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.99\textwidth]{pics/parallel.png}
+    \caption{Execution Mode of Pipelines with Different Jenkins Agents}
+    \label{fig:parallel}
+\end{figure}
+\par
+When comes to parallel job execution, the performance of Fargate is significantly better. This is because in Fargate, each container runs on an independent instance on AWS's infrastructure, Therefore AWS provisions one Fargate instance for each running job. The independence between Fargate instance ensures the agent will not compete for resource. On the other hand, when we runs multiple agent in our EC2 instance, due to the limitation of resource, part of running jobs has to wait until the resource on EC2 instance available until they can start the execution. To further investigate the reason for the result, we observe the parallel execution mode when runs 3 jobs in parallel. Figure \ref{fig:parallel} shows the execution modes. We find that, the easy scalable character (mentioned in \ref{servlesslimitation}) helps the serverless suites better with the parallel task. The long wait time is the reason that makes the total runtime in EC2 much longer. 
+\par
+We also notice that in Figure 5.2, when parallel task reach 10, the EC2 runtime becomes shorter. This is because we set auto-scaling for our EC2 instance. So in the later part of our experiment, the EC2 scaled from 1 to 2 and then to 3. But even with 3 EC2 instances, only 3 jobs are allowed to run in parallel, while in Fargate is easy to have 10 jobs runs in complete parallel method. This because the scaling of EC2 VMs is much slower, because is heavier to create a VM than create a new Fargate instance. The other reason is the auto-scaling of EC2 VM is based on reaching certain resource utilization threshold, while in Fargate is based on one instance per container(Jenkins agent). Even we set the scaling policy of EC2 to a more aggressive patten, the AWS still more "hesitate" to create new instances compared with in the Fargate.
+\subsubsection{Resource Utilization}
+We compared the average resource utilization within containers that runs Jenkins agent in two setups. The data from AWS cloud watch shows the resource utilization rate is similar in these 2 setups. This is because the "run in same way regardless of host environment" \cite{WhatisaC60:online} feature of Docker container that we mentioned in \ref{docker}.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.99\textwidth]{pics/utilizationecs.png}
+    \caption{The comparison of Resource Utilization}
+    \label{fig:utilizationecs}
+\end{figure}
+\subsubsection{Cost Analysis}
+The container orchestration service ECS itself is free of charge. We only pay for the resources we are using, which is Fargate or EC2 virtual machine.
+\par
+In AWS Fargate we pay only by resource we are using and the runtime. The price for Fargate service in EU(Stockholm) is \$0.004165 per GB RAM per hour plus \$0.0049 per vCPU per hour \footnote{https://aws.amazon.com/fargate/pricing/}. Thus in our experiment set-up (2vCPU, 2GB RAM) the price should be \$0.01813 per running agent for one hour's runtime.
+In AWS EC2 our cost depends on type of VM we are using. The type of VM we use for running Jenkins agents is t3.small that costs \$0.0216 per hour \footnote{https://aws.amazon.com/ec2/pricing/on-demand/}
+\par

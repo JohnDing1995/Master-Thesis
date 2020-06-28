@@ -75,7 +75,8 @@ Note that in our Git workflow, there are several time points that we need to run
 \subsection{Continuous Delivery Pipeline}
 \label{our-ci}
 \subsubsection{Tool Selection Considerations}
-\textit{Continuous Delivery Pipeline}\\
+In this section, we describe about our consideration when select tools used in the continuous deliver pipeline.
+\paragraph[]{Continuous Delivery Pipeline}
 The most popular server-based tools for build continuous delivery pipeline are Jenkins\footnote{https://www.jenkins.io/}, Drone\footnote{https://drone.io/}, GoCD\footnote{https://www.gocd.org/} and Circle CI\footnote{https://circleci.com/}. A comparison between these tools is shown in Table \ref{tab:ci-tools}. As we can see from the table, Jenkins is the most popular option for CI/CD. Jenkins has wide application in the commercial use case, and the high popularity in the open-source community as well. Although compared with the other 3 newer tools, Jenkins is more focuses on the "Build" step within the continuous delivery pipeline. However, the open-source nature of Jenkins gives it a much wider selection of the plugin, which means Jenkins can be used for almost all steps in a continuous delivery pipeline. 
 \begin{table}[h]
     \begin{tabular}{|l|l|l|l|l|}
@@ -109,16 +110,12 @@ Created by Kohsuke Kawaguchi in 2001, Jenkins is an open-source continuous integ
 Our continuous delivery pipeline is built with Pipeline plugin\footnote{https://www.jenkins.io/doc/book/pipeline/} in Jenkins. 
 Pipeline plugin allows us to define a continuous delivery pipeline as code in Jenkinsfile.
 In the pipeline, a conceptually distinct subset of tasks within the continuous delivery pipeline \cite{Pipeline85:online} is defined as a "stage"\footnote{For example, "Build", Test", "Deploy" step in a continuous delivery pipeline.} and each task within a step is called "step". Each pipeline is binding with a "project". An execution runtime of a project/pipeline is called "build" and the machine (virtual machine, container, etc.) for running the build is called "agent".
-\medskip
-\\
-\textit{Build \& Test Automation Tool}\\
+\paragraph[]{Build \& Test Automation Tool}
 For the build stage within Jenkins pipeline, we use Gradle\footnote{https://gradle.org/} as the build tool. 
 Gradle is a powerful build tool initially designed for JVM based language, but now it also supports other programming languages, for example, C++ and Python. Like Jenkins, Gradle also has a dynamic ecosystem with thousands of plugin. This enables the possibility to use different kinds of tools such as unit testing and code analysis within a single pipeline of Gradle. Gradle also makes the dependency management easy, dependencies could be easily added to the project by editing the Gradle configure file of the project. Furthermore, Gradle supports configuration as code. This allows developers to define all of the build configurations of a software project in a single file.
 \par
 For unit testing within the build stage, we using JUnit \footnote{https://junit.org/junit5/} as the tool for testing. For code analysis, we use SonarQube\footnote{https://www.sonarqube.org/}. Both are one of the most common used tools in their specialized field in the Java ecosystem. And both tools have official Gradle plugin which allows us easily use them with Gradle. 
-\medskip
-\\
-\textit{Docker}\\
+\paragraph[]{Deployment and Jenkins Agents}
 We will widely use Docker \footnote{https://www.docker.com/} in our pipeline.  Docker is an open-source software which could pack, deliver and run the software as a container. A container is an isolated unit that includes the application and all its dependencies which allow application runs in the same way regardless of the host environment \cite{WhatisaC60:online}. A container is the running instance of a Docker image that defined by Dockerfile.
 \par    
 \label{docker}
@@ -174,10 +171,13 @@ In CH3 we introduced AWS cloudwatch as one of the serverless service in AWS. In 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.70\textwidth]{pics/monitoring.png}
-    \caption{The Stages of our Pipeline Shown in Jenkins Dashboard}
+    \caption{Cloudwatch Monitoring Dashboard}
     \label{fig:monitoring}
 \end{figure}
-Another service we introduced in CH3 is AWS lambda. It is the most important serverless service in AWS. We also discussed how could it be used in our DevOps toolchain in which monitoring is one of the use cases. In our monitoring system, AWS lambda is used as an extension for cloud watch. 
+Another service we introduced in CH3 is AWS lambda. It is the most important serverless service in AWS. We also discussed how could it be used in our DevOps toolchain in which monitoring is one of the use cases. In our monitoring system, AWS lambda is used as an extension for cloud watch, and we use it for 2 cases.
+\paragraph[]{Auto-Scaling the ECS Cluster with Alarm in Cloudwatch}
+
+\paragraph[]{Custom Project-Specific Metrics}
 \section{Design of Serverless DevOps Toolchain}
 % \section{Cloud Services}
 % \label{assumption}
