@@ -59,8 +59,8 @@ We run the pipeline through 2 different setups, we will get the result of the fo
     \item \textit{Cost Structure} describes the daily cost of 2 setups under the same workload, within the same period.
     \item \textit{Resource Utilization} describes the average CPU/RAM usage for each instance during a single run of the pipeline.
 \end{itemize}
-\subsection{Result}
-Here shows the result of this experiment.
+\subsection{Result and Evaluation}
+Here shows the result of this experiment. We also evaluate our experiment result by analysing the factors that lead to the results.
 \subsubsection{Runtime}
 We first compare the runtime of these 2 setups. Except test the runtime of single job runs with two setups respectively, we also test the runtime of each pipeline setup under different number jobs executed in parallel. The test result is depicted in Figure \ref{fig:runtime}.
 \begin{figure}[h]
@@ -69,16 +69,17 @@ We first compare the runtime of these 2 setups. Except test the runtime of singl
     \caption{Runtime of Pipeline with Different Jenkins Agents}
     \label{fig:runtime}
 \end{figure}
-\par
-The test result shows that, when comes to the execution of single task. The traditional VM has faster delivery speed over serverless solution (AWS Fargate). However, with the number of jobs that run in parallel increases, the total runtime on the traditional VM decrease. On the contract, on serverless solution(Fargate), the runtime remains almost the same.
-\par
-We analyse the reason behind this result, we found out that the longer runtime with the single job on Fargate is because the longer starting time of Jenkins agent. In EC2, the Jenkins will simply provision a Docker container within EC2 VM, and connect to the Jenkins master node. However in Fargate, the Jenkins can only connect to agent once AWS finishes the initialization of underlay infrastructure that runs the serverless container. This takes significantly longer time. This shows the one of the limitation of serverless computing (cold-start) that we mentioned in \ref{servlesslimitation}.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.99\textwidth]{pics/parallel.png}
     \caption{Execution Mode of Pipelines with Different Jenkins Agents}
     \label{fig:parallel}
 \end{figure}
+\par
+The test result shows that, when comes to the execution of single task. The traditional VM has faster delivery speed over serverless solution (AWS Fargate). However, with the number of jobs that run in parallel increases, the total runtime on the traditional VM decrease. On the contract, on serverless solution(Fargate), the runtime remains almost the same.
+\par
+We analyse the reason behind this result, we found out that the longer runtime with the single job on Fargate is because the longer starting time of Jenkins agent. In EC2, the Jenkins will simply provision a Docker container within EC2 VM, and connect to the Jenkins master node. However in Fargate, the Jenkins can only connect to agent once AWS finishes the initialization of underlay infrastructure that runs the serverless container. This takes significantly longer time. This shows the one of the limitation of serverless computing (cold-start) that we mentioned in \ref{servlesslimitation}.
+
 \par
 When comes to parallel job execution, the performance of Fargate is significantly better. This is because in Fargate, each container runs on an independent instance on AWS's infrastructure, Therefore AWS provisions one Fargate instance for each running job. The independence between Fargate instance ensures the agent will not compete for resource. On the other hand, when we runs multiple agent in our EC2 instance, due to the limitation of resource, part of running jobs has to wait until the resource on EC2 instance available until they can start the execution. To further investigate the reason for the result, we observe the parallel execution mode when runs 3 jobs in parallel. Figure \ref{fig:parallel} shows the execution modes. We find that, the easy scalable character (mentioned in \ref{servlesslimitation}) helps the serverless suites better with the parallel task. The long wait time is the reason that makes the total runtime in EC2 much longer. 
 \par
@@ -95,5 +96,11 @@ We compared the average resource utilization within containers that runs Jenkins
 The container orchestration service ECS itself is free of charge. We only pay for the resources we are using, which is Fargate or EC2 virtual machine.
 \par
 In AWS Fargate we pay only by resource we are using and the runtime. The price for Fargate service in EU(Stockholm) is \$0.004165 per GB RAM per hour plus \$0.0049 per vCPU per hour \footnote{https://aws.amazon.com/fargate/pricing/}. Thus in our experiment set-up (2vCPU, 2GB RAM) the price should be \$0.01813 per running agent for one hour's runtime.
-In AWS EC2 our cost depends on type of VM we are using. The type of VM we use for running Jenkins agents is t3.small that costs \$0.0216 per hour \footnote{https://aws.amazon.com/ec2/pricing/on-demand/}
+In AWS EC2 our cost depends on type of VM we are using. The type of VM we use for running Jenkins agents is t3.small that costs \$0.0216 per hour \footnote{https://aws.amazon.com/ec2/pricing/on-demand/}. The Fargate-based Jenkins agent is cheaper than EC2-based agent.
 \par
+The pay-per-use characteristic of serverless service makes Fargate even more competitive in term of cost. The instance only up and run when the job is distributed by Jenkins master. One the job finished, the Fargate instance will be terminated immediately. However EC2 not so flexible due to the resource-utilization-based scaling policy. The EC2 instance is not scale in immediately after job finished, and user has to pay for the instance runtime before it gets terminated -- even there is no job running in EC2 instance any more.
+\subsection{Conclusion}
+In this experiment we compare the serverless (AWS Fargate) and non-serverless solution (EC2) for hosting distributed continuous delivery pipeline. The experiment shows that, the performance of serverless solution is worse when comes to single job execution, this is because the cold-start issue with serverless computing. However, in term of parallel job executing, the serverless solution has better performance over traditional VM. The cost of serverless solution is cheaper in AWS and the resource utilization is similar in both solutions.
+\section{Experiment on Managed DevOps Services}
+For solving the RQ2, we develop the DevOps toolchain        1
+\subsection{Architecture}

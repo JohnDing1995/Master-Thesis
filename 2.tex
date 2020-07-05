@@ -117,8 +117,8 @@ According to \cite{WhatisaD20:online}, Google Cloud state of DevOps reports \cit
 Planning software development project, track the tickets and the issues, communication between and within the teams. The project management tools help to implement the DevOps culture, which enhances collaboration and knowledge sharing.\\
 \textbf{Tools:} Slack, Jira, Trello, Asana
 \subsubsection{Configuration Management}
-Provided a central platform to manage the configuration across the assets. This is usually done by defining the desired state of the assets in a configure file and automate the configuration process which reaching the assets to the defined status.\\
-\textbf{Tools:} Puppet, Chef, Ansible
+Provided a central platform to manage the configuration across the assets. This is usually done by defining the desired state of the assets in a configure file and automate the configuration process which reaching the assets to the defined status. In cloud environment, a common practice of configuration management is through infrastructure as code, which is define the cloud infrastructure, services configuration and deployment orchestration as configuration file\cite{7965401}. \\
+\textbf{Tools:} Terraform, Puppet, Ansible
 \subsubsection{Continuous Integration}
 Continuous integration (in short: CI) is the top practice for improving the Deployment Frequency \cite{velasquez2014state}. It is one of the most important parts of DevOps toolchain. As we introduced at \ref{CD}, CI allows the developers to integrate their work more frequently to the production products, it shortens the time to the market of the product. The automatic testing and code analysis integrated into the CI continuously maintain the quality of the product. CI tools also automated the most parts of the software development pipeline, In conclusion, CI helps the system fulfil the DevOps definition (\ref{devops}) by speed up the delivery by automation, maintain the quality by continuous quality assurance. So CI is the core part of the whole DevOps toolchain.\\
 \textbf{Tools:} Jenkins, Drone CI, Teamcity, GitLab CI/CD
