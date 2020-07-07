@@ -50,42 +50,9 @@ The toolchain implementation is based on the DevOps elements we presented in Cha
 When the developer pushes a new commit to the repository in GitHub \footnote{https://github.com/}, Github will send an HTTP POST request that contains the necessary information to the Jenkins master node. Jenkins master which triggered by the HTTP request will create a new job for this project according to the information that the HTTP request contains. The job will first pull the latest code from the git repository, then runs the docker containers with required build environment and build the project. In the end, a docker image for running the project will be created and be pushed to the container registry of AWS. Depends on the git branch that the developer committed to, the project will be deployed to a different development environment.
 \par
 Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. We can see except version control, the whole environment is running in Amazon Web Services. Due to the limitation of space, the internal architecture of certain components is not shown in the graph, instead, we show them in the following sections.
-\subsection{Infrastructure as Code (IasC)}
-Configuration Management is one of the component of DevOps toolchain that we mentioned in Chapter 2. Infrastructure as code the common practices to implement configuration Management in the cloud-based environment.
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.99\textwidth]{pics/terraform.png}
-    \caption{Creating a cloud environment with Terraform CLI}
-    \label{fig:terraform}
-\end{figure}
-\par
-Terraform \footnote{https://www.terraform.io/} is one of the most popular tools to manage cloud Infrastructure with IasC practice. It has the thorough support of AWS. In our implementation, we define our could infrastructure and all AWS resources including EC2 virtual machine, ECS cluster, security groups and network Infrastructures in a series of configuration files. Then we create the cloud environment by simply using CLI interfaces. Figure \ref{fig:terraform} shows the creation of the cloud environment with Terraform.
-\subsection{Version Control}
-Version Control System (VCS) is the process that record the changes in files set over time \cite{GitAbout93:online}, and versioning the history of these files. VSC is suitable for track the development progress and manages the goal within a software development team \cite{loeliger2012version}. Among all software for version control, Git is the most popular one nowadays. The survey \cite{CompareR31:online} from Synopsys shows that in 2019, 71\% of the project today is using Git as it's versioning system while SVN that ranks in second only be used in 25\% of the projects. We use Git as the version control system since it is used by most of the software development teams nowadays. We use GitHub for hosting the case project. Github is the biggest preform in the world that hosting a version-controlled software project for free using Git. It provides interfaces with different DevOps related tools which makes it easy to be integrated into all kinds of DevOps toolchains.
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.99\textwidth]{pics/git.png}
-    \caption{GitHub Workflow \cite{guides2013understanding}}
-    \label{fig:git}
-\end{figure}
-\par
-The Git flow \cite{driessen2010successful} proposed in 2010 is a successful workflow for working with Git. Git flow has already widely used and has been approved by the software industries. However, to better cope with the frequent release nature of DevOps, the Github workflow -- a simplified version of Git flow is proposed by GitHub.
-Therefore GitHub workflow \cite{chacongithub} is being chosen as our workflow in the version control. The simplified version of this workflow is shown as in Figure \ref{fig:git}
-\par
-Several general principals followed by us when adapting GitHub flow, we refer the principals in \cite{chacongithub} to design our workflow.
-\begin{itemize}
-    \item Master branch is always deployable. This means when deploying the continuous delivery pipelines in our toolchain, only the master branch can be deployed. And there shouldn't have any code which is not good to be deployed in the master branch. 
-    \item When working on the new feature, make a new branch for this feature. The name of this branch should be descriptive which reflect the content of this feature. Commit the code related to this feature this branch and push from this branch to the branch with the same name on the remote server (github.com).
-    \item Open a pull request\footnote{https://help.github.com/en/GitHub/collaborating-with-issues-and-pull-requests/about-pull-requests} when the feature is ready to merge, or when you feel that you need help or comments from other team means on this feature. The code review is also done by others in the pull request.
-    \item When the code is already be reviewed and is good to be merged, the developer should merge the code to the master.
-    \item After the code of this feature is in the master, the code will and should be immediately deployed. There should not be any rollback in the master branch. If there are any issues within the newly merged code, a new commit or a new branch should be made to fix the issue rather than rollback on the master.
-\end{itemize}
-\par
-Note that in our Git workflow, there are several time points that we need to run the continuous delivery pipeline within the toolchain. The continuous delivery pipeline will also vary with the time point within the version control workflow. We will introduce this in detail on \ref{our-ci}.
-\subsection{Continuous Delivery Pipeline}
-\label{our-ci}
-\subsubsection{Tool Selection Considerations}
-In this section, we describe our consideration when select tools used in the continuously deliver pipeline.
+\subsection{Tool Selection Considerations}
+One of the most important step for build the non-integrated toolchain is to select proper tool for each component.
+In this section, we describe our consideration when select tools.
 \paragraph[]{Continuous Delivery Pipeline}
 The most popular server-based tools for build continuous delivery pipeline are Jenkins\footnote{https://www.jenkins.io/}, Drone\footnote{https://drone.io/}, GoCD\footnote{https://www.gocd.org/} and Circle CI\footnote{https://circleci.com/}. A comparison between these tools is shown in Table \ref{tab:ci-tools}. As we can see from the table, Jenkins is the most popular option for CI/CD. Jenkins has wide application in the commercial use case, and the high popularity in the open-source community as well. Although compared with the other 3 newer tools, Jenkins is more focuses on the "Build" step within the continuous delivery pipeline. Yet, the open-source nature of Jenkins gives it a much wider selection of the plugin, which means Jenkins can be used for almost all steps in a continuous delivery pipeline. 
 \begin{table}[h]
@@ -126,14 +93,54 @@ Gradle is a powerful build tool initially designed for JVM based language, but n
 \par
 For unit testing within the build stage, we using JUnit \footnote{https://junit.org/junit5/} as the tool for testing. For code analysis, we use SonarQube\footnote{https://www.sonarqube.org/}. Both are one of the most common used tools in their specialized field in the Java ecosystem. And both tools have official Gradle plugin which allows us easily use them with Gradle. 
 \paragraph[]{Deployment and Jenkins Agents}
-We will widely use Docker \footnote{https://www.docker.com/} in our pipeline.  Docker is an open-source software which could pack, deliver and run the software as a container. A container is an isolated unit that includes the application and all its dependencies which allow application runs in the same way regardless of the host environment \cite{WhatisaC60:online}. A container is the running instance of a Docker image that defined by Dockerfile.
+We will widely use Docker \footnote{https://www.docker.com/} in our pipeline.
+Docker is an open-source software which could pack, deliver and run the software as a container. A container is an isolated unit that includes the application and all its dependencies which allow application runs in the same way regardless of the host environment \cite{WhatisaC60:online}. A container is the running instance of a Docker image that defined by Dockerfile.
 \par    
 \label{docker}
-There will be 2 main use cases of Docker in our toolchain. Firstly, we run the build stage within the container. To build the case application, the host machine needs to have JVM installed. However, we want to make our pipeline not only suitable for Java application but also easily be used to build an application in other programming languages. Docker solves this problem by provides good isolation from the host machine. Therefore we can configure the built environment (operating system version, dependencies) runs within Docker container without actually install anything on the host machine by simply editing the Dockerfile.
+There will be 2 main use cases of Docker in our toolchain. Firstly, we run the build stage within the container.
+Nowadays, Docker\footnote{https://www.docker.com/} is being widely used as build agents in the continuous integration and continuous delivery (CI/CD) pipelines. 
+This means the pipeline will execute certain steps inside ephemeral Docker containers \cite{Overview44:online}. It is easier to manage build dependencies in Docker container. Besides, container based agent requires less effort to maintain. 
+\par
+In our case, to build the case application, the host machine needs to have JVM installed. However, we want to make our pipeline not only suitable for Java application but also easily be used to build an application in other programming languages. Docker solves this problem by provides good isolation from the host machine. Therefore we can configure the built environment (operating system version, dependencies) runs within Docker container without actually install anything on the host machine by simply editing the Dockerfile.
 \par
 We also use Docker to Dockerize our application which creates a Docker image of our application.
 Docker allows us to specify all system dependencies in a single file (Dockerfile), so there is no need to have any Java environment pre-installed in the deployment environment which runs our application. This is because all environment is already being packed in our Docker image. By doing this, firstly, we reduce the operational effort. Secondly, we improve compatibility since docker makes sure that the docker image could runs in the same behaviour no matter what host machine it runs on. Also, all major cloud computing providers support Docker. We could easily run the container from our Docker image on their VM and they're serverless computing services. This means our Dockerized application could easily be cloud-native and be deployed across a multi-cloud environment.
-\subsubsection{Pipeline OverView}
+\subsection{Infrastructure as Code (IasC)}
+Configuration Management is one of the component of DevOps toolchain that we mentioned in Chapter 2. Infrastructure as code the common practices to implement configuration Management in the cloud-based environment.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.99\textwidth]{pics/terraform.png}
+    \caption{Creating a cloud environment with Terraform CLI}
+    \label{fig:terraform}
+\end{figure}
+\par
+Terraform \footnote{https://www.terraform.io/} is one of the most popular tools to manage cloud Infrastructure with IasC practice. It has the thorough support of AWS. In our implementation, we define our could infrastructure and all AWS resources including EC2 virtual machine, ECS cluster, security groups and network Infrastructures in a series of configuration files. Then we create the cloud environment by simply using CLI interfaces. Figure \ref{fig:terraform} shows the creation of the cloud environment with Terraform.
+\subsection{Version Control}
+Version Control System (VCS) is the process that record the changes in files set over time \cite{GitAbout93:online}, and versioning the history of these files. VSC is suitable for track the development progress and manages the goal within a software development team \cite{loeliger2012version}. Among all software for version control, Git is the most popular one nowadays. The survey \cite{CompareR31:online} from Synopsys shows that in 2019, 71\% of the project today is using Git as it's versioning system while SVN that ranks in second only be used in 25\% of the projects. We use Git as the version control system since it is used by most of the software development teams nowadays. We use GitHub for hosting the case project. Github is the biggest preform in the world that hosting a version-controlled software project for free using Git. It provides interfaces with different DevOps related tools which makes it easy to be integrated into all kinds of DevOps toolchains.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.99\textwidth]{pics/git.png}
+    \caption{GitHub Workflow \cite{guides2013understanding}}
+    \label{fig:git}
+\end{figure}
+\par
+The Git flow \cite{driessen2010successful} proposed in 2010 is a successful workflow for working with Git. Git flow has already widely used and has been approved by the software industries. However, to better cope with the frequent release nature of DevOps, the Github workflow -- a simplified version of Git flow is proposed by GitHub.
+Therefore GitHub workflow \cite{chacongithub} is being chosen as our workflow in the version control. The simplified version of this workflow is shown as in Figure \ref{fig:git}
+\par
+Several general principals followed by us when adapting GitHub flow, we refer the principals in \cite{chacongithub} to design our workflow.
+\begin{itemize}
+    \item Master branch is always deployable. This means when deploying the continuous delivery pipelines in our toolchain, only the master branch can be deployed. And there shouldn't have any code which is not good to be deployed in the master branch. 
+    \item When working on the new feature, make a new branch for this feature. The name of this branch should be descriptive which reflect the content of this feature. Commit the code related to this feature this branch and push from this branch to the branch with the same name on the remote server (github.com).
+    \item Open a pull request\footnote{https://help.github.com/en/GitHub/collaborating-with-issues-and-pull-requests/about-pull-requests} when the feature is ready to merge, or when you feel that you need help or comments from other team means on this feature. The code review is also done by others in the pull request.
+    \item When the code is already be reviewed and is good to be merged, the developer should merge the code to the master.
+    \item After the code of this feature is in the master, the code will and should be immediately deployed. There should not be any rollback in the master branch. If there are any issues within the newly merged code, a new commit or a new branch should be made to fix the issue rather than rollback on the master.
+\end{itemize}
+\par
+Note that in our Git workflow, there are several time points that we need to run the continuous delivery pipeline within the toolchain. The continuous delivery pipeline will also vary with the time point within the version control workflow. We will introduce this in detail on \ref{our-ci}.
+
+\subsection{Continuous Delivery Pipeline with Jenkins}
+\label{our-ci}
+\subsubsection{Pipeline Steps and Distributed Build Model}
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.95\textwidth]{pics/overview.png}
@@ -143,12 +150,18 @@ Docker allows us to specify all system dependencies in a single file (Dockerfile
 Figure \ref{fig:overview} shows the 5 stages in our pipeline that shown in the Jenkins dashboard. The bottom part of this Figure shows the task distribution between the master node and agent nodes. 
 As we can see from the figure, when the master node starts a job, it will create a Docker container in AWS Fargate as the agent. The agent will pull codes from VCS, build the code, and then send the build artifacts back to the master node. After this, the container will be terminated. The master node will continue executes the rest steps.
 \par
-The considerations behind to our design are that the first 2 steps take most of the time in our pipeline and according to Figure \ref{fig:pipeline} runs more frequently than other steps \footnote{The reason will be discussed in next section "Pipeline Workflow"}. The running time will be further extended when building a larger project. These 2 stages will be the bottleneck of the pipeline if we have it on the master mode. So we need to offload these steps to Jenkins agents for better performance.
+The considerations behind to our design are that the first 2 steps take most of the time in our pipeline and according to Figure \ref{fig:pipeline} runs more frequently than other steps \footnote{The reason will be discussed in next section "Workflow in Production"}. The running time will be further extended when building a larger project. These 2 stages will be the bottleneck of the pipeline if we have it on the master mode. So we need to offload these steps to Jenkins agents for better performance.
 \par
 The second reason is: as we mentioned in our introduction of Docker at \ref{docker}, the built environment inside Jenkins agents that runs in Docker container is easier to be changed. When the team want to build the same code for different OS (Which happens in C/C++ development) or want to have a different build environment for different projects, they eliminate tasks such as configuration and installation different environment thanks to Docker. Instead, they can just modify the Dockerfile that defines the Docker image of the Jenkins agents.
 \par
 We also notice that the Deploy stage also takes a long time. Still, we don't have it in the distributed build because: first, it is on the end of a pipeline so it will not block the further steps, second, the pipeline runs the stage less frequently than first 2 stages as shown in Figure \ref{fig:pipeline}, thus there will be less possibility that there are many jobs runs at "Deploy" stage in parallel.
-\subsubsection{Pipeline Workflow}
+\subsubsection{Workflow of Continuous Delivery Pipeline}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.99\textwidth]{pics/pipeline.png}
+    \caption{The Workflow of Continuous Delivery Pipeline in Our DevOps Toolchain}
+    \label{fig:pipeline}
+\end{figure}
 Figure \ref{fig:pipeline} shows the workflow of a project that goes through our continuous delivery pipeline.
 We can see when the pipeline is triggered by the event on the feature branch, it only runs through the first 2 stages. This is because according to the practices of continuous integration mentioned by us in \ref{CD} and by Martin Fowler in \cite{fowler2006continuous}, a developer should merge(the "integration" in continuous integration) his/her work couple times per day. Therefore the whole pipeline will run the code with this new feature at least several times a day. This already ensures the code could frequently be tested and deployed into the test environment. Thus, in the pipeline runs after the push to the feature branch the further steps could be skipped. 
 \par
@@ -159,16 +172,11 @@ If all the above steps are done and no error returns, the developer can open a p
 After the code merged to the dev branch, the pipelines run again, this time it runs the whole pipeline. First, the pipeline executes the first two stages as in the feature branch. Now we have the Java ARchive file. The Java ARchive is an executable package of our Spring Boot application. Next step is to Dockerizing our application which generates the Docker image our application, and then we push the image to the Amazon Elastic Container Registry AWS (AWS ECR) for further use.
 \par
 \label{deploy}
-The last step of the pipeline is deployment, the pipeline pull image in ECR that we pushed in the last stage, and then deploy it to the deployment environment. 
+The last step of the pipeline is deployment, the pipeline pull image in ECR that we pushed in the last stage, and then deploy it to the deployment environment in ECS with AWS CIL. The deployment strategy we are using is rolling update. This means we gradually replacing instances in our deployment environment with the newer version of code.
 \par
 In the dev branch, we deploy the application to the staging environment. The deployment to staging environment should be automated, this is because the staging environment is only for testing, and only visible within the team. 
-In the staging environment, we will conduct API smoke testing \cite{Smoketes27:online}. This is for test if our deployed API works and if it works as expected. If the deployed function passes the smoke test, this shows the deployment works as expected and ready for the deployment. The developer could now open a pull request, merge code to master branch. The pipeline will runs again, and deploy the application to the production environment which is visible to the costumers.
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.99\textwidth]{pics/pipeline.png}
-    \caption{The Workflow of Continuous Delivery Pipeline in Our DevOps Toolchain}
-    \label{fig:pipeline}
-\end{figure}
+In the staging environment, we will conduct functional testing. This is for test if our deployed API works and if it works as expected. If the deployed function passes the smoke test, this shows the deployment works as expected and ready for the deployment. The developer could now open a pull request, merge code to master branch. The pipeline will runs again, and deploy the application to the production environment which is visible to the costumers.
+
 \subsection{Deployment Environment}
 \begin{figure}[h]
     \centering
@@ -188,7 +196,7 @@ When one availability zone is down, the load balancer can route the request make
 % \subsection{Smoke Testing}
 % Testing is an implement component within the DevOps pipeline
 % In this section, we further discuss the smoke testing that we mentioned in the \ref{deploy}.
-\subsection{Monitoring}
+\subsection{Monitoring the Deployment}
 Monitoring is one of the important components in the DevOps toolchain. Different from testing which usually integrated with the continuous delivery pipeline, the monitoring is independent of the pipeline. Usually, monitoring does not act as one step within the continuous delivery pipeline but as an independent component.
 \par
 In CH3 we introduced AWS CloudWatch as one of the serverless services in AWS. In our toolchain, we will use it as the primary tool for monitoring. With Cloudwatch, we not only can get the realtime log from our deployed container in the ECS but also the quantitative data, for example, memory utilization and network i/o, the monitoring dashboard can seem at figure \ref{fig:monitoring}
@@ -198,7 +206,7 @@ In CH3 we introduced AWS CloudWatch as one of the serverless services in AWS. In
     \caption{Cloudwatch Monitoring Dashboard}
     \label{fig:monitoring}
 \end{figure}
-Another service we introduced in CH3 is AWS lambda. It is the most important serverless service in AWS. We also discussed how could it be used in our DevOps toolchain in which monitoring is one of the use cases. In our monitoring system, AWS lambda is used as an extension for  CloudWatch, and we use it for 2 cases.
+Another service we introduced in CH3 is AWS lambda. It is the most important serverless service in AWS. We also discussed how could it be used in our DevOps toolchain in which monitoring is one of the use cases. In our monitoring system, AWS lambda is used as an extension for CloudWatch, and we use it for 2 cases.
 \paragraph[]{Auto-Scaling the ECS Cluster with Custom Alarm in Cloudwatch}
 As we mentioned in \ref{fig:deploy} Deployment Environment, The deployment could be auto-scaled. This is done by defining the auto-scaling policy within the ECS cluster. However, the scaling policy is not flexible enough, it only based on thresholds on certain metrics such as CPU utilization and memory utilization. The scaling process is usually done by this: When the watched resources utilization is above/below a certain threshold, an alarm in Cloudwatch will be triggered. The alarm will further trigger the scaling event if the scaling policy was being set before.
 \par
@@ -215,9 +223,55 @@ AWS provides a set of serverless DevOps tooling which could help us build a comp
     \caption{Serverless DevOps Toolchain}
     \label{fig:codepipeline}
 \end{figure}
-
-\subsection{Continuous Delivery Pipeline with AWS }
-The workflow of our continuous delivery pipeline is the same with the pipeline in \ref{CD}. Instead of Jenkins which is server-based, we build the pipeline with AWS CodePipeline. The steps in the CodePipeline shows in 
+\subsection{Continuous Delivery Pipeline with AWS CodePipeline}
+The workflow of our continuous delivery pipeline is the same with the pipeline in \ref{CD}. Instead of Jenkins which is server-based, we build the pipeline with AWS CodePipeline. Figure \ref{fig:codepipeline} shows the activity within the CodePipeline in a single graph. Different with Jenkins who can do solely the whole continuous delivery process with help of plugins, the CodePipeline is just provides a platform which you can configure a workflow with AWS DevOps tooling or other third party tools. 
+\par
+Same with in the non-integrated version, we using GitHub as version control system and it has the same role as it has in non-integrated toolchain. Although AWS also provides version control solution which is CodeCommit. It nevertheless lack of functionality of collaboration compared with GitHub. In addition, GitHub is already a serverless solution with a good integration with AWS DevOps tooling, so it is not necessary for us to change our version control system away from GitHub. 
+\par
+In the next step, we using AWS CodeBuild which we introduced in CH3. AWS CodeBuild does the same procedure as in Jenkins pipeline. It does code analysis, unit test and build the Java application with Gradle, build the Docker image of the application and push to the ECR. Different, the cloud deployment deploy our application to ECS with Blue-and-green deployment strategy.
+\par
+The implementation of a continuous delivery in CodePipeline is very simple compared with Jenkins. In Jenkins, without the help of plugin, the pipeline workflow can only be defined by groovy code, while CodePipeline natively provides graphical user interface for workflow modelling. In our implementation we just simply add each step with the graphical interfaces in CodePipeline.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.75\textwidth]{pics/cp-interface.png}
+    \caption{Our Workflow in CodePipeline}
+    \label{fig:cp-edit}
+\end{figure}
+\subsection{Build and Test with AWS CodeBuild}
+Same with the design of our Jenkins pipeline, AWS CodeBuild also executes the build within Docker container. The image of Docker container that provided by AWS already contains environment for build of different programming languages. It also include Java environment and Gradle which needed by our case project. Therefore we could save time in set up the pipeline since we don't need to define the Docker image for the build by ourself.
+\par
+As we mentioned in 4.3.1, the process within CodeBuild is the same as we have in Jenkins before the stage "Deploy". We will not describe the process again here. Same with Jenkins, the workflow of CodeBuild is defined in an YAML configuration file. The only difference in term of build workflow CodeBuild is that we store the build artifact to S3, the build artifact is the configuration file defines the deployment configuration in CodeDeploy. This is because CodeDeploy requires the deployment configuration from the step before it in order to run automatically.
+\subsection{Blue/Green Deployment with AWS CodeDeploy}
+One of the advantage of AWS DevOps tooling is the good integration with other AWS services. During the design and implementation our toolchain, this advantage shows in the deployment to ECS with CodeDeploy.
+\par
+In Jenkins there are lack of specific plugin that helps us deploy the project in to ECS or EKS, thus we have to deploy our project to ECS with AWS commend line interface(CIL). The problem with AWS CIL is that it only supports the most basic deployment strategy, which is rolling update deployment. The rolling deployment strategy is to replacing the old code running on the instances with new code gradually, instance by instance. 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.99\textwidth]{pics/bg.png}
+    \caption{Blue and Green Deployment for Our Deployment Solution}
+    \label{fig:bg}
+\end{figure}
+\par
+In real-life production, the team would like to make sure the deployment is reliable with minimized downtime. Thus the safety in highly valued in deployment strategy. In answering this need, a strategy called blue/green deployment which is now widely used in the industry. AWS CodeDeploy natively supports blue green strategy.
+A blue/green deployment is a deployment strategy that requires two set of totally identical deployment environment that runs the new and origin version of code respectively, while the router gradually routing more incoming requests to the environment that runs the newer version of code. 
+\par
+Figure \ref{fig:bg} shows the visualisation of blue/green deployment. It also show our design on how to implement blue/green deployment with CodeDeploy (shown before in Figure \ref{fig:deploy}). CodeDeploy control a router before the load balancer. When new deployment comes, CodeDeploy do following steps:
+\begin{itemize}
+    \item Provisioning new identical deployment environment (replacement environment) and deploy newer version of code on it. In ECS, the deployment is called "task set".
+    \item Control the router, rerouteing incoming traffic gradually to replacement ECS task set. We set the rerouteing rule as 10\% per minuets. We don't rerouteing all traffic at once to ensure the service will not fully down if the new deployed task set not work properly. This minimizes the downtime of our deployment.
+    \item Wait for 5 minuets after rerouteing is done. During the rerouteing and this 5 minuets, the load balancer in replacement deployment environment keeps doing the health check by sending request to health check API endpoint of our case project. CodeDeploy read the health status from load balancer. If the replacement tasks set is un-healthy, CodeDeploy do rollback by rerouteing incoming traffic back to origin tasks set.
+    \item If the new deployment is still healthy after 5 minuets of waiting time, CodeDeploy terminates the origin tasks set. Now the whole deploy process is done.
+\end{itemize}
+Compare with the rolling update we are using in Jenkins pipeline, the better safety of blue/green deployment reflected at, when error happens with newer version of code, we can immediately roll back to the last version by switching the rerouteing to Blue \cite{UsingBlu65:online} without redeploy the previous version. Under the same circumstance, the rollback with rolling update is nevertheless takes too long time, since we have to replacing the already deployed code back to the previous version. This could cause longer downtime of the server. 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.90\textwidth]{pics/codedeploy_steps.png}
+    \caption{CodeDeploy Dashboard}
+    \label{fig:codedeploy_steps}
+\end{figure}
+\par
+The better integration of CodeDeploy with the rest of AWS also be evidenced by the monitoring of deployed solution. Aside the existing monitoring with CloudWatch, CodeDeploy also provides us a dashboard to show the deploy progress and the traffic rerouteing process. Figure \ref{fig:codedeploy_steps} shows the dashboard of CodeDeploy that shows the status of our case project during the deployment.
+% In comparison, with Jenkins + AWS CIL we can not easily do the blue/green deployment. 
 % \section{Cloud Services}
 % \label{assumption}
 % In this section, we will introduce several could service from CH3 that could be helpful to the DevOps toolchain. 

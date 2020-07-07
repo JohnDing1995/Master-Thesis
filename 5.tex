@@ -3,15 +3,11 @@ In this chapter, we describe our experiments regarding 2 research questions we p
 \par
 In the first experiment, we will examine how does the serverless compute engine for containers (Amazon ECS on AWS Fargate) could be used in the continuous delivery pipeline(in our case, Jenkins) -- the core element of our DevOps toolchain. The second experiment shows how does serverless functions (AWS lambda) could be used in DevOps toolchain. The last experiment focuses on answering research question 2, in which we will using compared continuous delivery pipeline composed of fully-managed serverless DevOps tools in AWS with our Jenkins-based pipeline that runs on the virtual machine.
 \section{Experiment on Serverless Container Services}
-Nowadays, Docker\footnote{https://www.docker.com/} is being widely used as build agents in the continuous integration and continuous delivery (CI/CD) pipelines. 
-This means the pipeline will execute certain steps inside ephemeral Docker containers \cite{Overview44:online}. It is easier to manage build dependencies in Docker container. Besides, container based agent requires less effort to maintain. 
-\par
-(This paragraph might be moved to CH4 later, to justify our design)
 The Docker agent has already been supported by many CI/CD tools, for example container job\footnote{https://docs.microsoft.com/en-us/azure/devops/pipelines/process/container-phases} in Azure DevOps\footnote{https://azure.microsoft.com/en-us/services/devops/}, Docker agent in TeamCity \footnote{https://www.jetbrains.com/help/teamcity/build-agent.html}, Docker agent\footnote{https://www.jenkins.io/doc/book/pipeline/docker/} in Jenkins and docker runner\footnote{https://docs.drone.io/runner/docker/overview/} in Drone\footnote{https://drone.io/}
 \par
 The serverless container services in AWS (AWS Fargate) provides possibility to further ease the infrastructure management task for the Docker build agents. 
 This experiment is a controlled experiment which examines whether serverless container service could improve the continuous delivery pipeline from various perspectives.
-\subsection{Test task and System Description}
+\subsection{Test Task and System Description}
 In this experiment, we run the continuous delivery process of a Spring Boot web application with our DevOps toolchain. From the experiments, we could verify our assumption in CH3, and better-answering research question 1.
 \par
 As we described in Chapter 4, the continuous delivery pipeline includes the following steps:
@@ -24,7 +20,7 @@ As we described in Chapter 4, the continuous delivery pipeline includes the foll
 \par
 In these 4 steps, the step "Build" and "Checkout" is being done in parallel within the ECS cluster. As we mentioned in CH4, when the new job started in the Jenkins master server, Jenkins will provision a new container instance within the ECS cluster. The container is managed directly by AWS, so we don't need to create and manage the virtual machine that runs the container. We use this setup in our initial implementation as the control group.
 \par
-In the experimental group, we replace AWS Fargate with traditional VM, which is EC2 in the Amazon Web Services. The parallelization pattern remains the same, this means as in the control group, only the first two steps are being run distributively in the Jenkins nodes. The EC2 instances belongs to a auto scaling group that will scale up when CPU Utilization rate reach 70\%. The initial size for auto scaling group is 1
+In the experimental group, we replace AWS Fargate with traditional VM, which is EC2 in the Amazon Web Services. The parallelization pattern remains the same, this means as in the control group, only the first two steps are being run distributively in the Jenkins nodes. The EC2 instances belongs to a auto scaling group that will scale up when CPU Utilization rate reach 70\%. The initial size for auto scaling group is 1.
 \par
 Figure \ref{fig:ex1} shows the architecture of 2 groups in this experiment. The experimental group on the left is a Jenkins server with the traditional virtual machine as workers node that hosting the container agent. The architecture of the control group on the right has agent nodes dynamically provisioned as serverless containers hosed by AWS Fargate.
 \begin{figure}[h]
@@ -47,8 +43,8 @@ The experiments are conducted on Amazon Web Services (AWS). The hardware of Jenk
 \par
 In the control group, which is the implementation we presented in CH4, the Jenkins agents run on AWS ECS powered by AWS Fargate. The virtual hardware resources that are allocated to each serverless container is 2 virtual CPU, and 2 GB of RAM. This makes sure that each container shares the same hardware resources as in another group, so the hardware will not affect the result.
 \subsubsection{Software}
-We maintain the same software setup in each group. The operation System for EC2 instance that runs Jenkins master node is Ubuntu Server 18.04. The version of Jenkins that runs on the server is 2.222.3. For connect ECS and Fargate which works as the Jenkins agents, we use Jenkins plugin "Amazon Elastic Container Service (ECS) / Fargate", version 1.34. The container in Fargate/EC2 for running the Checkout and Build steps is from our developed docker image which you can find at \footnote{https://hub.docker.com/r/dry1995/jnlp}. The docker image includes essential dependencies that will be used to build the Spring Boot application and the base image which allow container connects Jenkins master as an agent. The "Build" step in our pipeline uses Gradle (version: 6.2.1) as the build tool for the application, the automated testing and code analysis is being integrated with this step, and being conducted by plugin of Gradle.
-
+We maintain the same software setup in each group. The operation System for EC2 instance that runs Jenkins master node is Ubuntu Server 18.04. The version of Jenkins that runs on the server is 2.222.3. For connect ECS and Fargate which works as the Jenkins agents, we use Jenkins plugin "Amazon Elastic Container Service (ECS) / Fargate", version 1.34. The container in Fargate/EC2 for running the Checkout and Build steps is from our developed docker image which you can find at \footnote{https://hub.docker.com/r/dry1995/jnlp}. The docker image includes essential dependencies that will be used to build the Spring Boot application and the base image which allow container connects Jenkins master as an agent. The "Build" step in our pipeline uses Gradle (version: 6.2.1) as the build tool for the application, 
+with openjdk 1.8.0.252 as Java virtual machine (JVM). The automated testing and code analysis is being integrated with this step, and being conducted by plugin of Gradle.
 \par
 To shows how does the 2 setups performance within the teams with different sizes, we run by run the different number of tasks parallel through the pipeline. This simulates the different team size that  and show the scalability when comes to the need for task parallelization in bigger organizations.
 
@@ -101,6 +97,26 @@ In AWS EC2 our cost depends on type of VM we are using. The type of VM we use fo
 The pay-per-use characteristic of serverless service makes Fargate even more competitive in term of cost. The instance only up and run when the job is distributed by Jenkins master. One the job finished, the Fargate instance will be terminated immediately. However EC2 not so flexible due to the resource-utilization-based scaling policy. The EC2 instance is not scale in immediately after job finished, and user has to pay for the instance runtime before it gets terminated -- even there is no job running in EC2 instance any more.
 \subsection{Conclusion}
 In this experiment we compare the serverless (AWS Fargate) and non-serverless solution (EC2) for hosting distributed continuous delivery pipeline. The experiment shows that, the performance of serverless solution is worse when comes to single job execution, this is because the cold-start issue with serverless computing. However, in term of parallel job executing, the serverless solution has better performance over traditional VM. The cost of serverless solution is cheaper in AWS and the resource utilization is similar in both solutions.
-\section{Experiment on Managed DevOps Services}
-For solving the RQ2, we develop the DevOps toolchain        1
-\subsection{Architecture}
+\section{Experiment and Analysis of Managed DevOps Services}
+For solving the RQ2, we compare the implementation of our design of two different the DevOps toolchain -- the non-integrated Jenkins based toolchain and the AWS DevOps toolchain implementation with AWS DevOps tooling.
+\subsection{Test Task and System Description}
+The first part of the experiment is similar with the last experiment, we deliver our case project through two DevOps toolchains. And we compare quantitative result from experiment.
+The second part we are going to compare the functionality of these toolchains. However we will not compare all to functional, the scope of the comparison is limited around the actual problem we encounter during the implementation.  We will talk about the implementation difficulties, functionality limitation and flexibility.
+\par
+During the experiment we have set up as follows:
+\paragraph{Hardware}
+AWS DevOps tools allow us to select the hardware configuration for underlying computing resources. The configuration we chose is 2 virtual CPU and 3 GB RAM.
+The Hardware configuration for Jenkins build agent is 2 virtual CPU and 4 GB RAM. We cannot set the RAM to 3 GB since AWS Fargate is not allowing \footnote{https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html} RAM to below 4GM when using 2 virtual CPU. However, we still allowed to set a additional software RAM limit to the build agent runs in Fargate agent, thus, we limit the RAM that a running build agent to 3 GB, which ensure both setup has identical hardware configuration.
+\paragraph{Software}
+The version of Jenkins that runs on the server is 2.222.3. We use Jenkins plugin ”Amazon Elastic Container Ser-vice (ECS) / Fargate”, version 1.34 for connect ECS and Fargate which works as the Jenkins agents. The Jenkins cluster has the same configuration as the last experiment. The build environment in both setup is the same, with Gradle (version:6.2.1) and JVM version is openjdk 1.8.0.252.
+\subsection{Performance Properties and Evaluation Criteria}
+We run the pipeline on these 2 different setups, we will get the result of the following properties:
+\begin{itemize}
+    \item \textit{Runtime} describes the total time for finishing all the jobs. If the jobs runs in parallel, the runtime is from start of jobs until the end of the last finished job.
+    \item \textit{Cost Structure} describes the daily cost of 2 setups under the same workload, within the same period.
+\end{itemize}
+The resource utilization comparison is not available in the experiment since we cannot get the resources utilization in underlying hardware resource when running AWS DevOps tools.
+\subsection{Quantitative Experiment Result and Evaluation}
+\subsection{Functionality Comparison}
+*** Should this subsection be moved to CH4? ***
+
