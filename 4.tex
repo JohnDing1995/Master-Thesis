@@ -140,28 +140,33 @@ Note that in our Git workflow, there are several time points that we need to run
 
 \subsection{Continuous Delivery Pipeline with Jenkins}
 \label{our-ci}
-\subsubsection{Pipeline Steps and Distributed Build Model}
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.95\textwidth]{pics/overview.png}
     \caption{The Stages and Distributed Build in Our Pipeline}
     \label{fig:overview}
 \end{figure}
-Figure \ref{fig:overview} shows the 5 stages in our pipeline that shown in the Jenkins dashboard. The bottom part of this Figure shows the task distribution between the master node and agent nodes. 
-As we can see from the figure, when the master node starts a job, it will create a Docker container in AWS Fargate as the agent. The agent will pull codes from VCS, build the code, and then send the build artifacts back to the master node. After this, the container will be terminated. The master node will continue executes the rest steps.
+Figure \ref{fig:overview} shows the 5 stages in our pipeline that shown in the Jenkins dashboard. The bottom part of this Figure shows the task distribution between the master node and agent nodes. The master node is a EC2 virtual machine while agents runs on Fargate instances within a ECS cluster.
 \par
+As we can see from the figure, when the master node starts a job, it will create a Docker container in AWS Fargate as the agent. The agent will pull codes from VCS, build the code, and then send the build artifacts back to the master node. After this, the container will be terminated. The master node will continue executes the rest steps.
+\paragraph[]{Build Agents}
+Build agent is an independent computation unit (VM or Docker container) that could exchange data with Jenkins master node and run certain part of pipeline. To implement a Jenkins build cluster, we need to first implement build agents.
+We discussed why we use Docker-based agent in our Jenkins build cluster on \ref{docker} and we decide to it in our implementation. The first step of our implementation is to develop our own Docker image \footnote{You could find the Docker image we developed at https://hub.docker.com/r/dry1995/jnlp} of the Jenkins agent. We use the "jenkins/jnlp-slave"\footnote{https://hub.docker.com/r/jenkins/jnlp-slave/} as the base image, this allow our Jenkins agent establish inbound connection to the Jenkins master with TCP. The next step is to set up build environment within agent. We add shell script for auto-install all build dependencies to build our case project when we build this Docker image. In the last step, we build the Docker image for build agent and push it to DockerHub. 
+\par
+We also discussed how Fargate allows us to run container serverlessly. To make use of Serverless offering of AWS, we let Docker based Jenkins agents runs on AWS Fargate in order to minimize the operational effort and automate the scaling of Jenkins cluster. To implement this, we use Jenkins plugin "Amazon Elastic Container Service (ECS) / Fargate which is the only Jenkins plugin allow us to host Jenkins agent in Fargate.  
+\paragraph[]{Considerations in Designing the Workflow of Distributed Pipeline}
 The considerations behind to our design are that the first 2 steps take most of the time in our pipeline and according to Figure \ref{fig:pipeline} runs more frequently than other steps \footnote{The reason will be discussed in next section "Workflow in Production"}. The running time will be further extended when building a larger project. These 2 stages will be the bottleneck of the pipeline if we have it on the master mode. So we need to offload these steps to Jenkins agents for better performance.
 \par
-The second reason is: as we mentioned in our introduction of Docker at \ref{docker}, the built environment inside Jenkins agents that runs in Docker container is easier to be changed. When the team want to build the same code for different OS (Which happens in C/C++ development) or want to have a different build environment for different projects, they eliminate tasks such as configuration and installation different environment thanks to Docker. Instead, they can just modify the Dockerfile that defines the Docker image of the Jenkins agents.
+The second reason is: as we mentioned in our introduction of Docker at \ref{docker}, the built environment inside Jenkins agents that runs in Docker container is easier to be changed. When the team want to build the same code for different OS (Which happens in C/C++ development) or want to have a different build environment for different projects, they eliminate tasks such as configuration and installation different environment thanks to Docker. Instead, they can just modify the Dockerfile that defines the Docker image of the Jenkins agents. However, we can't put the stage that build Docker image in Jenkins agents. This is because AWS Fargate does not allows build agent runs in a privileged container which means we cannot use Docker within the Jenkins agent's container that runs in Fargate. This is one significant limitation of Fargate, so we have to move the step back to master node. Fortunately, in case project the Docker build only takes very short time (<1s on average). Therefore this won't slow down the whole pipeline.
 \par
 We also notice that the Deploy stage also takes a long time. Still, we don't have it in the distributed build because: first, it is on the end of a pipeline so it will not block the further steps, second, the pipeline runs the stage less frequently than first 2 stages as shown in Figure \ref{fig:pipeline}, thus there will be less possibility that there are many jobs runs at "Deploy" stage in parallel.
-\subsubsection{Workflow of Continuous Delivery Pipeline}
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.99\textwidth]{pics/pipeline.png}
     \caption{The Workflow of Continuous Delivery Pipeline in Our DevOps Toolchain}
     \label{fig:pipeline}
 \end{figure}
+\paragraph[]{Workflow for Continuous Delivery}
 Figure \ref{fig:pipeline} shows the workflow of a project that goes through our continuous delivery pipeline.
 We can see when the pipeline is triggered by the event on the feature branch, it only runs through the first 2 stages. This is because according to the practices of continuous integration mentioned by us in \ref{CD} and by Martin Fowler in \cite{fowler2006continuous}, a developer should merge(the "integration" in continuous integration) his/her work couple times per day. Therefore the whole pipeline will run the code with this new feature at least several times a day. This already ensures the code could frequently be tested and deployed into the test environment. Thus, in the pipeline runs after the push to the feature branch the further steps could be skipped. 
 \par
