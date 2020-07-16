@@ -1,9 +1,9 @@
 \chapter{Design of DevOps Toolchains}
 In this chapter, we will introduce the design and implementation of DevOps toolchains.
-Note that for the experiment that answering RQs in Chapter 5, we implement two different continuous delivery pipelines design with two sets of tools respectively, one with tradition non-integrated tool while another one with the serverless integrated DevOps tools from AWS. In conclusion, we introduce the design of both toolchains(server-based and serverless) and explain how we come to this implementation in this chapter. 
+Note that for the experiment that answering RQs in Chapter 5, we implement two different continuous delivery pipelines design with two sets of tools respectively, one with tradition non-integrated tool while another one with the serverless integrated DevOps tools from AWS. In conclusion, we introduce the design of both toolchains(server-based and serverless) and explain how we come to this implementation in this chapter.
 We will also compare these two types of toolchains within the scope of functionality and ease of implementation.
 \par
-In Section 4.1 we present the case software project developed by us that will be built, tested, and deployed by our DevOps toolchain in the experiment. In section 4.2 we introduce the design and implementation of our non-integrated DevOps toolchain. Section 4.3 is related to integrated toolchain.
+In Section 4.1 we present the case software project developed by us that will be built, tested, and deployed by our DevOps toolchain in the experiment. In section 4.2 we introduce the design and implementation of our non-integrated DevOps toolchain. Section 4.3 is related to the integrated toolchain.
 \section{Case Project}
 We first develop the case project. The case project is an example software project which will be used to test our implementation and run the experiments. This means we will simulate the DevOps development process of the case project on our DevOps toolchain. Although the type of our case project has no effect on our DevOps toolchain on the architecture level, the build dependencies and the software configuration inside our toolchain could be affected by it. Thus is necessary for us to have an introduction to the case project.
 \subsection{Programming Language and Framework Considerations}
@@ -13,40 +13,40 @@ To the DevOps point of view, the Java programming language has a very complete e
 \par
 Therefore, due to the popularity, versatility and complete ecosystem of Java programming language, we select Java as the language of the case project.
 \par
-One of the major application of Java in web development. Currently, 7 out of 10 \cite{Programm17:online} most popular website is using Java as a web development language (server-side). In the field of web development, Spring framework is the most popular framework for Java and it's being used in many major internet companies including Google, Microsoft and Amazon \cite{SpringWh14:online}. 
+One of the major application of Java in web development. Currently, 7 out of 10 \cite{Programm17:online} most popular website is using Java as a web development language (server-side). In the field of web development, Spring framework is the most popular framework for Java and it's being used in many major internet companies including Google, Microsoft and Amazon \cite{SpringWh14:online}.
 \par
-So, we choose Spring the framework to build our application. To develop our Spring application, we use Spring Boot\footnote{https://spring.io/projects/spring-boot}. Spring Boot is a project under Spring, which according to its documentation, is to allow the developer to create Spring application with the minimal effort \cite{SpringBo84:online}, by simplifying the configuration of Spring framework. 
+So, we choose Spring the framework to build our application. To develop our Spring application, we use Spring Boot\footnote{https://spring.io/projects/spring-boot}. Spring Boot is a project under Spring, which according to its documentation, is to allow the developer to create Spring application with the minimal effort \cite{SpringBo84:online}, by simplifying the configuration of Spring framework.
 \subsection{Project Description}
 \begin{figure}[!h]
-    \begin{verbatim}
-        Method: GET
-        Endpoint: /packages
-        Success Response:
-            Code: 200
-            Content: 
-            [
-                {
-                    name : (Package name)
-                    description : (Package description)
-                    dependencies : (Dependencies) 
-               }
-            ]
-        Error Response:
-            Code: 500
-            Content: { msg: Server Error! }
-        \end{verbatim}
-        \label{fig:rest}
-\caption{RESTful API Interface of Case Project}      
+\begin{verbatim}
+Method: GET
+Endpoint: /packages
+Success Response:
+Code: 200
+Content:
+[
+{
+name : (Package name)
+description : (Package description)
+dependencies : (Dependencies)
+}
+]
+Error Response:
+Code: 500
+Content: { msg: Server Error! }
+\end{verbatim}
+\label{fig:rest}
+\caption{RESTful API Interface of Case Project}
 \end{figure}
 The case project is a simple REST API (Figure \ref{fig:rest}) which returns the info of all installed software packages in the host machine in JSON format when the frontend sends an HTTP GET request to the backend.
 \section{Design of Non-integrated DevOps Toolchain}
-In section, we present our design of  DevOps toolchain which is non-integrated. Part of the components is still based on the virtual machine. Each section is the introduction to the design of each component. We also present the consideration when a select tool for this part of the toolchain in each section. Besides, in each section, we introduce how could serverless computing be used by this component in general and the benefits to the specific tool we select.
+In section, we present our design of DevOps toolchain which is non-integrated. Part of the components is still based on the virtual machine. Each section is the introduction to the design of each component. We also present the consideration when a select tool for this part of the toolchain in each section. Besides, in each section, we introduce how could serverless computing be used by this component in general and the benefits to the specific tool we select.
 \subsection{Architecture}
 \begin{figure}[!htbp]
-    \centering
-    \includegraphics[width=0.99\textwidth]{pics/arch-med-jenkins.png}
-    \caption{Architecture diagram of our DevOps toolchain}
-    \label{fig:archjenkins}
+\centering
+\includegraphics[width=0.99\textwidth]{pics/arch-med-jenkins.png}
+\caption{Architecture diagram of our DevOps toolchain}
+\label{fig:archjenkins}
 \end{figure}
 The toolchain implementation is based on the DevOps elements we presented in Chapter 2, and the DevOps practises from Eficode. Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. In here we only presenting architecture on a more general level. The detailed architecture of each component will be introduced in the following sections, in both text and graph.
 \par
@@ -54,120 +54,122 @@ When the developer pushes a new commit to the repository in GitHub \footnote{htt
 \par
 Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. We can see except version control, the whole environment is running in Amazon Web Services. Due to the limitation of space, the internal architecture of certain components is not shown in the graph, instead, we show them in the following sections.
 \subsection{Tool Selection Considerations}
-One of the most important step for build the non-integrated toolchain is to select proper tool for each component.
-In this section, we describe our consideration when select tools.
+One of the most important steps to build the non-integrated toolchain is to select the proper tool for each component.
+In this section, we describe our consideration when we select tools.
 \paragraph[]{Continuous Delivery Pipeline}
-The most popular server-based tools for build continuous delivery pipeline are Jenkins\footnote{https://www.jenkins.io/}, Drone\footnote{https://drone.io/}, GoCD\footnote{https://www.gocd.org/} and Circle CI\footnote{https://circleci.com/}. A comparison between these tools is shown in Table \ref{tab:ci-tools}. As we can see from the table, Jenkins is the most popular option for CI/CD. Jenkins has wide application in the commercial use case, and the high popularity in the open-source community as well. Although compared with the other 3 newer tools, Jenkins is more focuses on the "Build" step within the continuous delivery pipeline. Yet, the open-source nature of Jenkins gives it a much wider selection of the plugin, which means Jenkins can be used for almost all steps in a continuous delivery pipeline. 
+The most popular server-based tools for build continuous delivery pipeline are Jenkins\footnote{https://www.jenkins.io/}, Drone\footnote{https://drone.io/}, GoCD\footnote{https://www.gocd.org/} and Circle CI\footnote{https://circleci.com/}. A comparison between these tools is shown in Table \ref{tab:ci-tools}. As we can see from the table, Jenkins is the most popular option for CI/CD. Jenkins has wide application in the commercial use case, and the high popularity in the open-source community as well. Although compared with the other 3 newer tools, Jenkins is more focuses on the "Build" step within the continuous delivery pipeline. Yet, the open-source nature of Jenkins gives it a much wider selection of the plugin, which means Jenkins can be used for almost all steps in a continuous delivery pipeline.
 \begin{table}[h]
-    \begin{tabular}{|l|l|l|l|l|}
-    \hline
-                        & Jenkins & Drone & Circle CI & GoCD \\ \hline
-    Open Source         & Yes     & Yes   & No        & Yes  \\ \hline
-    GitHub stars        & 15.7k   & 21.2k & -         & 5.7k \\ \hline
-    Github contributors & 614     & 258   & -         & 116  \\ \hline
-    Plugin extensions &
-      Over 1500 \tablefootnote{https://plugins.jenkins.io/} &
-      93 \tablefootnote{According to GitHub search result} &
-      110 \tablefootnote{https://circleci.com/integrations/} &
-      88 \tablefootnote{https://www.gocd.org/plugins/} \\ \hline
-    \begin{tabular}[c]{@{}l@{}}Price of self-hosted \\ solution\end{tabular} &
-      Free &
-      Free &
-      \$35 user/month &
-      Free \\ \hline
-    \begin{tabular}[c]{@{}l@{}}Number of companies\\use it in the tech stack\tablefootnote{based on data from StackShare}\end{tabular} &
-      2634 &
-      82 &
-      1368 &
-      42 \\ \hline
-    \end{tabular}
-    \caption{Comparison of continuous delivery tools}
-    \label{tab:ci-tools}
-    \end{table}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+& Jenkins & Drone & Circle CI & GoCD \\ \hline
+Open Source & Yes & Yes & No & Yes \\ \hline
+GitHub stars & 15.7k & 21.2k & - & 5.7k \\ \hline
+Github contributors & 614 & 258 & - & 116 \\ \hline
+Plugin extensions &
+Over 1500 \tablefootnote{https://plugins.jenkins.io/} &
+93 \tablefootnote{According to GitHub search result} &
+110 \tablefootnote{https://circleci.com/integrations/} &
+88 \tablefootnote{https://www.gocd.org/plugins/} \\ \hline
+\begin{tabular}[c]{@{}l@{}}Price of self-hosted \\ solution\end{tabular} &
+Free &
+Free &
+\$35 user/month &
+Free \\ \hline
+\begin{tabular}[c]{@{}l@{}}Number of companies\\use it in the tech stack\tablefootnote{based on data from StackShare}\end{tabular} &
+2634 &
+82 &
+1368 &
+42 \\ \hline
+\end{tabular}
+\caption{Comparison of continuous delivery tools}
+\label{tab:ci-tools}
+\end{table}
 \par
-Created by Kohsuke Kawaguchi in 2001, Jenkins is an open-source continuous integrating tool write with Java.  It is suitable for a team of all sizes and varies of languages and technologies \cite{smart2011jenkins}. Furthermore, Jenkins also attracts software teams with it's easy-to-use and high extendibility \cite{smart2011jenkins} with thousand of the plugin. More plugin keeps coming since Jenkins has an active open-source community. These plugins help Jenkins keep up with the fast-developing DevOps practices, and help Jenkins integrate with the newly emerging tools and cloud services. The extendibility makes Jenkins still the most popular tool for DevOps toolchain even it's an aged software created when the term "DevOps" just appeared.
+Created by Kohsuke Kawaguchi in 2001, Jenkins is an open-source continuous integrating tool write with Java. It is suitable for a team of all sizes and varies of languages and technologies \cite{smart2011jenkins}. Furthermore, Jenkins also attracts software teams with its easy-to-use and high extendibility \cite{smart2011jenkins} with a thousand of the plugin. More plugin keeps coming since Jenkins has an active open-source community. These plugins help Jenkins keep up with the fast-developing DevOps practices, and help Jenkins integrate with the newly emerging tools and cloud services. The extendibility makes Jenkins still the most popular tool for DevOps toolchain even it's an aged software created when the term "DevOps" just appeared.
 \par
-Our continuous delivery pipeline is built with Pipeline plugin\footnote{https://www.jenkins.io/doc/book/pipeline/} in Jenkins. 
+Our continuous delivery pipeline is built with Pipeline plugin\footnote{https://www.jenkins.io/doc/book/pipeline/} in Jenkins.
 Pipeline plugin allows us to define a continuous delivery pipeline as code in Jenkinsfile.
 In the pipeline, a conceptually distinct subset of tasks within the continuous delivery pipeline \cite{Pipeline85:online} is defined as a "stage"\footnote{For example, "Build", Test", "Deploy" step in a continuous delivery pipeline.} and each task within a step is called "step". Each pipeline is binding with a "project". An execution runtime of a project/pipeline is called "build" and the machine (virtual machine, container, etc.) for running the build is called "agent".
 \paragraph[]{Build \& Test Automation Tool}
-For the build stage within Jenkins pipeline, we use Gradle\footnote{https://gradle.org/} as the build tool. 
-Gradle is a powerful build tool initially designed for JVM based language, but now it also supports other programming languages, for example, C++ and Python. Like Jenkins, Gradle also has a dynamic ecosystem with thousands of plugin. This enables the possibility to use different kinds of tools such as unit testing and code analysis within a single pipeline of Gradle. Gradle also makes the dependency management easy, dependencies could be easily added to the project by editing the Gradle configure file of the project. Furthermore, Gradle supports configuration as code. This allows developers to define all of the build configurations of a software project in a single file.
+For the build stage within Jenkins pipeline, we use Gradle\footnote{https://gradle.org/} as the build tool.
+Gradle is a powerful build tool initially designed for JVM based language, but now it also supports other programming languages, for example, C++ and Python. Like Jenkins, Gradle also has a dynamic ecosystem with thousands of plugin. This enables the possibility to use different kinds of tools such as unit testing and code analysis within a single pipeline of Gradle. Gradle also makes the dependency management easy, dependencies could be easily added to the project by editing the Gradle configure file of the project. Furthermore, Gradle supports configuration as code. This allows developers to define all the build configurations of a software project in a single file.
 \par
-For unit testing within the build stage, we using JUnit \footnote{https://junit.org/junit5/} as the tool for testing. For code analysis, we use SonarQube\footnote{https://www.sonarqube.org/}. Both are one of the most common used tools in their specialized field in the Java ecosystem. And both tools have official Gradle plugin which allows us easily use them with Gradle. 
+For unit testing within the build stage, we're using JUnit \footnote{https://junit.org/junit5/} as the tool for testing. For code analysis, we use SonarQube\footnote{https://www.sonarqube.org/}. Both are one of the most common used tools in their specialized field in the Java ecosystem. And both tools have official Gradle plugin which allows us easily use them with Gradle.
 \paragraph[]{Deployment and Jenkins Agents}
 We will widely use Docker \footnote{https://www.docker.com/} in our pipeline.
 Docker is an open-source software which could pack, deliver and run the software as a container. A container is an isolated unit that includes the application and all its dependencies which allow application runs in the same way regardless of the host environment \cite{WhatisaC60:online}. A container is the running instance of a Docker image that defined by Dockerfile.
-\par    
+\par
 \label{docker}
 There will be 2 main use cases of Docker in our toolchain. Firstly, we run the build stage within the container.
-Nowadays, Docker\footnote{https://www.docker.com/} is being widely used as build agents in the continuous integration and continuous delivery (CI/CD) pipelines. 
-This means the pipeline will execute certain steps inside ephemeral Docker containers \cite{Overview44:online}. It is easier to manage build dependencies in Docker container. Besides, container based agent requires less effort to maintain. 
+Nowadays, Docker\footnote{https://www.docker.com/} is being widely used as build agents in continuous integration and continuous delivery (CI/CD) pipelines.
+This means the pipeline will execute certain steps inside ephemeral Docker containers \cite{Overview44:online}. It is easier to manage build dependencies in the Docker container. Besides, the container-based agent requires less effort to maintain.
 \par
-In our case, to build the case application, the host machine needs to have JVM installed. However, we want to make our pipeline not only suitable for Java application but also easily be used to build an application in other programming languages. Docker solves this problem by provides good isolation from the host machine. Therefore we can configure the built environment (operating system version, dependencies) runs within Docker container without actually install anything on the host machine by simply editing the Dockerfile.
+In our case, to build the case application, the host machine needs to have JVM installed. However, we want to make our pipeline not only suitable for Java application but also easily be used to build an application in other programming languages. Docker solves this problem by provides good isolation from the host machine. Thus, we can configure the built environment (operating system version, dependencies) runs within a Docker container without actually install anything on the host machine by simply editing the Dockerfile.
 \par
 We also use Docker to Dockerize our application which creates a Docker image of our application.
-Docker allows us to specify all system dependencies in a single file (Dockerfile), so there is no need to have any Java environment pre-installed in the deployment environment which runs our application. This is because all environment is already being packed in our Docker image. By doing this, firstly, we reduce the operational effort. Secondly, we improve compatibility since docker makes sure that the docker image could runs in the same behaviour no matter what host machine it runs on. Also, all major cloud computing providers support Docker. We could easily run the container from our Docker image on their VM and they're serverless computing services. This means our Dockerized application could easily be cloud-native and be deployed across a multi-cloud environment.
+Docker allows us to specify all system dependencies in a single file (Dockerfile), so there is no need to have any Java environment pre-installed in the deployment environment which runs our application. This is because all environment is already being packed in our Docker image. By doing this, firstly, we reduce the operational effort. Secondly, we improve compatibility since docker makes sure that the docker image could run in the same behaviour no matter what host machine it runs on. Also, all major cloud computing providers support Docker. We could easily run the container from our Docker image on their VM, and they're serverless computing services. This means our Dockerized application could easily be cloud-native and be deployed across a multi-cloud environment.
 \subsection{Infrastructure as Code (IasC)}
 Configuration Management is one of the component of DevOps toolchain that we mentioned in Chapter 2. Infrastructure as code the common practices to implement configuration Management in the cloud-based environment.
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.99\textwidth]{pics/terraform.png}
-    \caption{Creating a cloud environment with Terraform CLI}
-    \label{fig:terraform}
+\centering
+\includegraphics[width=0.99\textwidth]{pics/terraform.png}
+\caption{Creating a cloud environment with Terraform CLI}
+\label{fig:terraform}
 \end{figure}
 \par
 Terraform \footnote{https://www.terraform.io/} is one of the most popular tools to manage cloud Infrastructure with IasC practice. It has the thorough support of AWS. In our implementation, we define our could infrastructure and all AWS resources including EC2 virtual machine, ECS cluster, security groups and network Infrastructures in a series of configuration files. Then we create the cloud environment by simply using CLI interfaces. Figure \ref{fig:terraform} shows the creation of the cloud environment with Terraform.
 \subsection{Version Control}
 Version Control System (VCS) is the process that record the changes in files set over time \cite{GitAbout93:online}, and versioning the history of these files. VSC is suitable for track the development progress and manages the goal within a software development team \cite{loeliger2012version}. Among all software for version control, Git is the most popular one nowadays. The survey \cite{CompareR31:online} from Synopsys shows that in 2019, 71\% of the project today is using Git as it's versioning system while SVN that ranks in second only be used in 25\% of the projects. We use Git as the version control system since it is used by most of the software development teams nowadays. We use GitHub for hosting the case project. Github is the biggest preform in the world that hosting a version-controlled software project for free using Git. It provides interfaces with different DevOps related tools which makes it easy to be integrated into all kinds of DevOps toolchains.
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.99\textwidth]{pics/git.png}
-    \caption{GitHub Workflow \cite{guides2013understanding}}
-    \label{fig:git}
+\centering
+\includegraphics[width=0.99\textwidth]{pics/git.png}
+\caption{GitHub Workflow \cite{guides2013understanding}}
+\label{fig:git}
 \end{figure}
 \par
 The Git flow \cite{driessen2010successful} proposed in 2010 is a successful workflow for working with Git. Git flow has already widely used and has been approved by the software industries. However, to better cope with the frequent release nature of DevOps, the Github workflow -- a simplified version of Git flow is proposed by GitHub.
-Therefore GitHub workflow \cite{chacongithub} is being chosen as our workflow in the version control. The simplified version of this workflow is shown as in Figure \ref{fig:git}
+Therefore, GitHub workflow \cite{chacongithub} is being chosen as our workflow in the version control. The simplified version of this workflow is shown as in Figure \ref{fig:git}
 \par
-Several general principals followed by us when adapting GitHub flow, we refer the principals in \cite{chacongithub} to design our workflow.
+Several general principles followed by us when adapting GitHub flow, we refer to principals in \cite{chacongithub} to design our workflow.
 \begin{itemize}
-    \item Master branch is always deployable. This means when deploying the continuous delivery pipelines in our toolchain, only the master branch can be deployed. And there shouldn't have any code which is not good to be deployed in the master branch. 
-    \item When working on the new feature, make a new branch for this feature. The name of this branch should be descriptive which reflect the content of this feature. Commit the code related to this feature this branch and push from this branch to the branch with the same name on the remote server (github.com).
-    \item Open a pull request\footnote{https://help.github.com/en/GitHub/collaborating-with-issues-and-pull-requests/about-pull-requests} when the feature is ready to merge, or when you feel that you need help or comments from other team means on this feature. The code review is also done by others in the pull request.
-    \item When the code is already be reviewed and is good to be merged, the developer should merge the code to the master.
-    \item After the code of this feature is in the master, the code will and should be immediately deployed. There should not be any rollback in the master branch. If there are any issues within the newly merged code, a new commit or a new branch should be made to fix the issue rather than rollback on the master.
+\item Master branch is always deployable. This means when deploying the continuous delivery pipelines in our toolchain, only the master branch can be deployed. And there shouldn't have any code which is not good to be deployed in the master branch.
+\item When working on the new feature, make a new branch for this feature. The name of this branch should be descriptive which reflect the content of this feature. Commit the code related to this feature this branch and push from this branch to the branch with the same name on the remote server (github.com).
+\item Open a pull request\footnote{https://help.github.com/en/GitHub/collaborating-with-issues-and-pull-requests/about-pull-requests} when the feature is ready to merge, or when you feel that you need help or comments from other team means on this feature. The code review is also done by others in the pull request.
+\item When the code is already be reviewed and is good to be merged, the developer should merge the code to the master.
+\item After the code of this feature is in the master, the code will and should be immediately deployed. There should not be any rollback in the master branch. If there are any issues within the newly merged code, a new commit or a new branch should be made to fix the issue rather than rollback on the master.
 \end{itemize}
 \par
 Note that in our Git workflow, there are several time points that we need to run the continuous delivery pipeline within the toolchain. The continuous delivery pipeline will also vary with the time point within the version control workflow. We will introduce this in detail on \ref{our-ci}.
 
+
+
 \subsection{Continuous Delivery Pipeline with Jenkins}
 \label{our-ci}
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.95\textwidth]{pics/overview.png}
-    \caption{The Stages and Distributed Build in Our Pipeline}
-    \label{fig:overview}
+ \centering
+ \includegraphics[width=0.95\textwidth]{pics/overview.png}
+ \caption{The Stages and Distributed Build in Our Pipeline}
+ \label{fig:overview}
 \end{figure}
-Figure \ref{fig:overview} shows the 5 stages in our pipeline that shown in the Jenkins dashboard. The bottom part of this Figure shows the task distribution between the master node and agent nodes. The master node is a EC2 virtual machine while agents runs on Fargate instances within a ECS cluster.
+Figure \ref{fig:overview} shows the 5 stages in our pipeline that shown in the Jenkins dashboard. The bottom part of this Figure shows the task distribution between the master node and agent nodes. The master node is an EC2 virtual machine while agents run on Fargate instances within an ECS cluster.
 \par
 As we can see from the figure, when the master node starts a job, it will create a Docker container in AWS Fargate as the agent. The agent will pull codes from VCS, build the code, and then send the build artifacts back to the master node. After this, the container will be terminated. The master node will continue executes the rest steps.
 \paragraph[]{Build Agents}
-Build agent is an independent computation unit (VM or Docker container) that could exchange data with Jenkins master node and run certain part of pipeline. To implement a Jenkins build cluster, we need to first implement build agents.
-We discussed why we use Docker-based agent in our Jenkins build cluster on \ref{docker} and we decide to it in our implementation. The first step of our implementation is to develop our own Docker image \footnote{You could find the Docker image we developed at https://hub.docker.com/r/dry1995/jnlp} of the Jenkins agent. We use the "jenkins/jnlp-slave"\footnote{https://hub.docker.com/r/jenkins/jnlp-slave/} as the base image, this allow our Jenkins agent establish inbound connection to the Jenkins master with TCP. The next step is to set up build environment within agent. We add shell script for auto-install all build dependencies to build our case project when we build this Docker image. In the last step, we build the Docker image for build agent and push it to DockerHub. 
+Build agent is an independent computation unit (VM or Docker container) that could exchange data with the Jenkins master node and run a certain part of the pipeline. To implement a Jenkins build cluster, we need to first implement build agents.
+We discussed why we use Docker-based agent in our Jenkins build a cluster on \ref{docker} and we decide to it in our implementation. The first step of our implementation is to develop our own Docker image \footnote{You could find the Docker image we developed at https://hub.docker.com/r/dry1995/jnlp} of the Jenkins agent. We use the "jenkins/jnlp-slave"\footnote{https://hub.docker.com/r/jenkins/jnlp-slave/} as the base image, this allows our Jenkins agent to establish an inbound connection to the Jenkins master with TCP. The next step is to set up the build environment within the agent. We add shell script for auto-install all build dependencies to build our case project when we build this Docker image. In the last step, we build the Docker image for build agent and push it to DockerHub. 
 \par
-We also discussed how Fargate allows us to run container serverlessly. To make use of Serverless offering of AWS, we let Docker based Jenkins agents runs on AWS Fargate in order to minimize the operational effort and automate the scaling of Jenkins cluster. To implement this, we use Jenkins plugin "Amazon Elastic Container Service (ECS) / Fargate which is the only Jenkins plugin allow us to host Jenkins agent in Fargate.  
+We also discussed how Fargate allows us to run container serverless. To make use of Serverless offering of AWS, we let Docker-based Jenkins agents run on AWS Fargate to cut the operational effort and automate the scaling of Jenkins cluster. To implement this, we use Jenkins plugin "Amazon Elastic Container Service (ECS) / Fargate which is the only Jenkins plugin allow us to host Jenkins agent in Fargate.  
 \paragraph[]{Considerations in Designing the Workflow of Distributed Pipeline}
 The considerations behind to our design are that the first 2 steps take most of the time in our pipeline and according to Figure \ref{fig:pipeline} runs more frequently than other steps \footnote{The reason will be discussed in next section "Workflow in Production"}. The running time will be further extended when building a larger project. These 2 stages will be the bottleneck of the pipeline if we have it on the master mode. So we need to offload these steps to Jenkins agents for better performance.
 \par
-The second reason is: as we mentioned in our introduction of Docker at \ref{docker}, the built environment inside Jenkins agents that runs in Docker container is easier to be changed. When the team want to build the same code for different OS (Which happens in C/C++ development) or want to have a different build environment for different projects, they eliminate tasks such as configuration and installation different environment thanks to Docker. Instead, they can just modify the Dockerfile that defines the Docker image of the Jenkins agents. However, we can't put the stage that build Docker image in Jenkins agents. This is because AWS Fargate does not allows build agent runs in a privileged container which means we cannot use Docker within the Jenkins agent's container that runs in Fargate. This is one significant limitation of Fargate, so we have to move the step back to master node. Fortunately, in case project the Docker build only takes very short time (<1s on average). Therefore this won't slow down the whole pipeline.
+The second reason is: as we mentioned in our introduction of Docker at \ref{docker}, the built environment inside Jenkins agents that runs in Docker container is easier to be changed. When the team want to build the same code for different OS (Which happens in C/C++ development) or want to have a different build environment for different projects, they eliminate tasks such as configuration and installation different environment thanks to Docker. Instead, they can just modify the Dockerfile that defines the Docker image of the Jenkins agents. However, we can't put the stage that builds a Docker image in Jenkins agents. This is because AWS Fargate does not allow building agent runs in a privileged container which means we cannot use Docker within the Jenkins agent's container that runs in Fargate. This is one significant limitation of Fargate, so we have to move the step back to the master node. Fortunately, in case project the Docker build only takes a very short time (<1s on average). Therefore this won't slow down the whole pipeline.
 \par
 We also notice that the Deploy stage also takes a long time. Still, we don't have it in the distributed build because: first, it is on the end of a pipeline so it will not block the further steps, second, the pipeline runs the stage less frequently than first 2 stages as shown in Figure \ref{fig:pipeline}, thus there will be less possibility that there are many jobs runs at "Deploy" stage in parallel.
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.99\textwidth]{pics/pipeline.png}
-    \caption{The Workflow of Continuous Delivery Pipeline in Our DevOps Toolchain}
-    \label{fig:pipeline}
+ \centering
+ \includegraphics[width=0.99\textwidth]{pics/pipeline.png}
+ \caption{The Workflow of Continuous Delivery Pipeline in Our DevOps Toolchain}
+ \label{fig:pipeline}
 \end{figure}
 \paragraph[]{Workflow for Continuous Delivery}
 Figure \ref{fig:pipeline} shows the workflow of a project that goes through our continuous delivery pipeline.
@@ -180,17 +182,17 @@ If all the above steps are done and no error returns, the developer can open a p
 After the code merged to the dev branch, the pipelines run again, this time it runs the whole pipeline. First, the pipeline executes the first two stages as in the feature branch. Now we have the Java ARchive file. The Java ARchive is an executable package of our Spring Boot application. Next step is to Dockerizing our application which generates the Docker image our application, and then we push the image to the Amazon Elastic Container Registry AWS (AWS ECR) for further use.
 \par
 \label{deploy}
-The last step of the pipeline is deployment, the pipeline pull image in ECR that we pushed in the last stage, and then deploy it to the deployment environment in ECS with AWS CIL. The deployment strategy we are using is rolling update. This means we gradually replacing instances in our deployment environment with the newer version of code.
+The last step of the pipeline is deployment, the pipeline pull image in ECR that we pushed in the last stage, and then deploy it to the deployment environment in ECS with AWS CIL. The deployment strategy we are using is the rolling update. This means we gradually replacing instances in our deployment environment with the newer version of code.
 \par
 In the dev branch, we deploy the application to the staging environment. The deployment to staging environment should be automated, this is because the staging environment is only for testing, and only visible within the team. 
 In the staging environment, we will conduct functional testing. This is for test if our deployed API works and if it works as expected. If the deployed function passes the smoke test, this shows the deployment works as expected and ready for the deployment. The developer could now open a pull request, merge code to master branch. The pipeline will runs again, and deploy the application to the production environment which is visible to the costumers.
 
 \subsection{Deployment Environment}
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.99\textwidth]{pics/deploy.png}
-    \caption{Deployment Environment}
-    \label{fig:deploy}
+ \centering
+ \includegraphics[width=0.99\textwidth]{pics/deploy.png}
+ \caption{Deployment Environment}
+ \label{fig:deploy}
 \end{figure}
 We create a simple deployment environment with AWS Elastic Container Service and Elastic Load Balancer. Same with Jenkins agents, we use Fargate to host our containerized case project. 
 \par
@@ -209,10 +211,10 @@ Monitoring is one of the important components in the DevOps toolchain. Different
 \par
 In Chapter 3 we introduced AWS CloudWatch as one of the serverless services in AWS. In our toolchain, we will use it as the primary tool for monitoring. With Cloudwatch, we not only can get the realtime log from our deployed container in the ECS but also the quantitative data, for example, memory utilization and network i/o, the monitoring dashboard can seem at figure \ref{fig:monitoring}
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.70\textwidth]{pics/monitoring.png}
-    \caption{Cloudwatch Monitoring Dashboard}
-    \label{fig:monitoring}
+ \centering
+ \includegraphics[width=0.70\textwidth]{pics/monitoring.png}
+ \caption{Cloudwatch Monitoring Dashboard}
+ \label{fig:monitoring}
 \end{figure}
 Another service we introduced in Chapter 3 is AWS lambda. It is the most important serverless service in AWS. We also discussed how could it be used in our DevOps toolchain in which monitoring is one of the use cases. In our monitoring system, AWS lambda is used as an extension for CloudWatch, and we use it for 2 cases.
 \paragraph[]{Auto-Scaling the ECS Cluster with Custom Alarm in Cloudwatch}
@@ -224,61 +226,61 @@ A good practice solves the problem is to use a single group of alarm that only t
 \paragraph[]{Custom Project-Specific Metrics}
 The second application scenario is related to the first one. The Cloudwatch has support on recourse utilization metrics. But, some metrics are project-specific and not related to resources utilization and performance. For example, the number of successful payment has been made in a payment service. In such a case, Lambda could fill the gap within the scope of CloudWatch. The team could set up a Lambda function which gets the number by monitoring the log with PutMetricData provided by CloudWatch. This Lambda can further forward the metrics to metrics analysis and visualisation platform, for example, Grafana \footnote{https://grafana.com/grafana/} to give the management team an overview of the KPIs.
 \section{Design of Serverless DevOps Toolchain}
-AWS provides a set of serverless DevOps tooling which could help us build a completely serverless DevOps toolchain. We introduced these tools in Chapter 3. In the section, we introduce the design of Serverless toolchain based on DevOps tooling of AWS. Certain part of toolchain is the same with the non-integrated DevOps toolchain that introduced in last section, therefore we will not introduce these component again, rather we only focus on how do we make use AWS DevOps toolchain. Figure \ref{fig:codepipeline} shows the general workflow of a project delivered by our serverless DevOps toolchain.
+AWS provides a set of serverless DevOps tooling which could help us build a completely serverless DevOps toolchain. We introduced these tools in Chapter 3. In the section, we introduce the design of Serverless toolchain based on DevOps tooling of AWS. A certain part of the toolchain is the same with the non-integrated DevOps toolchain that introduced in the last section, therefore we will not introduce these components again, rather we only focus on how do we make use AWS DevOps toolchain. Figure \ref{fig:codepipeline} shows the general workflow of a project delivered by our serverless DevOps toolchain.
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.90\textwidth]{pics/codepipeline.png}
-    \caption{Serverless DevOps Toolchain}
-    \label{fig:codepipeline}
+ \centering
+ \includegraphics[width=0.90\textwidth]{pics/codepipeline.png}
+ \caption{Serverless DevOps Toolchain}
+ \label{fig:codepipeline}
 \end{figure}
 \subsection{Continuous Delivery Pipeline with AWS CodePipeline}
-The workflow of our continuous delivery pipeline is the same with the pipeline in \ref{CD}. Instead of Jenkins which is server-based, we build the pipeline with AWS CodePipeline. Figure \ref{fig:codepipeline} shows the activity within the CodePipeline in a single graph. Different with Jenkins who can do solely the whole continuous delivery process with help of plugins, the CodePipeline is just provides a platform which you can configure a workflow with AWS DevOps tooling or other third party tools. 
+The workflow of our continuous delivery pipeline is the same as the pipeline in \ref{CD}. Instead of Jenkins which is server-based, we build the pipeline with AWS CodePipeline. Figure \ref{fig:codepipeline} shows the activity within the CodePipeline in a single graph. Different from Jenkins who can do solely the whole continuous delivery process with help of plugins, the CodePipeline just provides a platform which you can configure a workflow with AWS DevOps tooling or other third-party tools. 
 \par
-Same with in the non-integrated version, we using GitHub as version control system and it has the same role as it has in non-integrated toolchain. Although AWS also provides version control solution which is CodeCommit. It nevertheless lack of functionality of collaboration compared with GitHub. In addition, GitHub is already a serverless solution with a good integration with AWS DevOps tooling, so it is not necessary for us to change our version control system away from GitHub. 
+Same within the non-integrated version, we used GitHub as the version control system and it has the same role as it has in the non-integrated toolchain. Although AWS also provides version control solution which is CodeCommit. It still lacks the functionality of collaboration compared with GitHub. Also, GitHub is already a serverless solution with good integration with AWS DevOps tooling, so it is not necessary for us to change our version control system away from GitHub. 
 \par
-In the next step, we using AWS CodeBuild which we introduced in Chapter 3. AWS CodeBuild does the same procedure as in Jenkins pipeline. It does code analysis, unit test and build the Java application with Gradle, build the Docker image of the application and push to the ECR. Different, the cloud deployment deploy our application to ECS with Blue-and-green deployment strategy.
+In the next step, we using AWS CodeBuild which we introduced in Chapter 3. AWS CodeBuild does the same procedure as in Jenkins pipeline. It does code analysis, unit test and builds the Java application with Gradle, build the Docker image of the application and push to the ECR. Different, the cloud deployment deploys our application to ECS with Blue-and-green deployment strategy.
 \par
-The implementation of a continuous delivery in CodePipeline is very simple compared with Jenkins. In Jenkins, without the help of plugin, the pipeline workflow can only be defined by groovy code, while CodePipeline natively provides graphical user interface for workflow modelling. In our implementation we just simply add each step with the graphical interfaces in CodePipeline.
+The implementation of continuous delivery in CodePipeline is very simple compared with Jenkins. In Jenkins, without the help of the plugin, the pipeline workflow can only be defined by groovy code, while CodePipeline natively provides a graphical user interface for workflow modelling. In our implementation, we just simply add each step with the graphical interfaces in CodePipeline.
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.75\textwidth]{pics/cp-interface.png}
-    \caption{Our Workflow in CodePipeline}
-    \label{fig:cp-edit}
+ \centering
+ \includegraphics[width=0.75\textwidth]{pics/cp-interface.png}
+ \caption{Our Workflow in CodePipeline}
+ \label{fig:cp-edit}
 \end{figure}
 \subsection{Build and Test with AWS CodeBuild}
-Same with the design of our Jenkins pipeline, AWS CodeBuild also executes the build within Docker container. The image of Docker container that provided by AWS already contains environment for build of different programming languages. It also include Java environment and Gradle which needed by our case project. Therefore we could save time in set up the pipeline since we don't need to define the Docker image for the build by ourself.
+Same with the design of our Jenkins pipeline, AWS CodeBuild also executes the build within Docker container. The image of Docker container that provided by AWS already contains environment for build of different programming languages. It also includes Java environment and Gradle which needed by our case project. Therefore we could save time in setting up the pipeline since we don't need to define the Docker image for the build by ourself.
 \par
-As we mentioned in 4.3.1, the process within CodeBuild is the same as we have in Jenkins before the stage "Deploy". We will not describe the process again here. Same with Jenkins, the workflow of CodeBuild is defined in an YAML configuration file. The only difference in term of build workflow CodeBuild is that we store the build artifact to S3, the build artifact is the configuration file defines the deployment configuration in CodeDeploy. This is because CodeDeploy requires the deployment configuration from the step before it in order to run automatically.
+As we mentioned in 4.3.1, the process within CodeBuild is the same as we have in Jenkins before the stage "Deploy". We will not describe the process again here. Same with Jenkins, the workflow of CodeBuild is defined in a YAML configuration file. The only difference in term of build workflow CodeBuild is that we store the build artifact to S3, the build artifact is the configuration file defines the deployment configuration in CodeDeploy. This is because CodeDeploy requires the deployment configuration from the step before it to run automatically.
 \subsection{Blue/Green Deployment with AWS CodeDeploy}
-One of the advantage of AWS DevOps tooling is the good integration with other AWS services. During the design and implementation our toolchain, this advantage shows in the deployment to ECS with CodeDeploy.
+One of the advantages of AWS DevOps tooling is good integration with other AWS services. During the design and implementation of our toolchain, this advantage shows in the deployment to ECS with CodeDeploy.
 \par
-In Jenkins there are lack of specific plugin that helps us deploy the project in to ECS or EKS, thus we have to deploy our project to ECS with AWS commend line interface(CIL). The problem with AWS CIL is that it only supports the most basic deployment strategy, which is rolling update deployment. The rolling deployment strategy is to replacing the old code running on the instances with new code gradually, instance by instance. 
+In Jenkins there is lack of specific plugin that helps us deploy the project into ECS or EKS, thus we have to deploy our project to ECS with AWS command-line interface(CIL). The problem with AWS CIL is that it only supports the most basic deployment strategy, which is rolling update deployment. The rolling deployment strategy is to replace the old code running on the instances with new code gradually, instance by instance. 
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.99\textwidth]{pics/bg.png}
-    \caption{Blue and Green Deployment for Our Deployment Solution}
-    \label{fig:bg}
+ \centering
+ \includegraphics[width=0.99\textwidth]{pics/bg.png}
+ \caption{Blue and Green Deployment for Our Deployment Solution}
+ \label{fig:bg}
 \end{figure}
 \par
-In real-life production, the team would like to make sure the deployment is reliable with minimized downtime. Thus the safety in highly valued in deployment strategy. In answering this need, a strategy called blue/green deployment which is now widely used in the industry. AWS CodeDeploy natively supports blue green strategy.
-A blue/green deployment is a deployment strategy that requires two set of totally identical deployment environment that runs the new and origin version of code respectively, while the router gradually routing more incoming requests to the environment that runs the newer version of code. 
+In real-life production, the team would like to make sure the deployment is reliable with minimized downtime. Thus the safety in highly valued in deployment strategy. In answering this need, a strategy called blue/green deployment which is now widely used in the industry. AWS CodeDeploy natively supports the blue/green strategy.
+A blue/green deployment is a deployment strategy that requires two sets of totally identical deployment environment that runs the new and original version of code respectively, while the router gradually routing more incoming requests to the environment that runs the newer version of code. 
 \par
-Figure \ref{fig:bg} shows the visualisation of blue/green deployment. It also show our design on how to implement blue/green deployment with CodeDeploy (shown before in Figure \ref{fig:deploy}). CodeDeploy control a router before the load balancer. When new deployment comes, CodeDeploy do following steps:
+Figure \ref{fig:bg} shows the visualisation of blue/green deployment. It also shows our design on how to implement blue/green deployment with CodeDeploy (shown before in Figure \ref{fig:deploy}). CodeDeploy controls a router before the load balancer. When new deployment comes, CodeDeploy does the following steps:
 \begin{itemize}
-    \item Provisioning new identical deployment environment (replacement environment) and deploy newer version of code on it. In ECS, the deployment is called "task set".
-    \item Control the router, rerouteing incoming traffic gradually to replacement ECS task set. We set the rerouteing rule as 10\% per minuets. We don't rerouteing all traffic at once to ensure the service will not fully down if the new deployed task set not work properly. This minimizes the downtime of our deployment.
-    \item Wait for 5 minuets after rerouteing is done. During the rerouteing and this 5 minuets, the load balancer in replacement deployment environment keeps doing the health check by sending request to health check API endpoint of our case project. CodeDeploy read the health status from load balancer. If the replacement tasks set is un-healthy, CodeDeploy do rollback by rerouteing incoming traffic back to origin tasks set.
-    \item If the new deployment is still healthy after 5 minuets of waiting time, CodeDeploy terminates the origin tasks set. Now the whole deploy process is done.
+ \item Provisioning new identical deployment environment (replacement environment) and deploy a newer version of code on it. In ECS, the deployment is called "task set".
+ \item Control the router, rerouting incoming traffic gradually to replacement ECS task set. We set the rerouteing rule as 10\% per minuets. We don't rerouting all traffic at once to ensure the service will not fully down if the new deployed task set not works properly. This minimizes the downtime of our deployment.
+ \item Wait for 5 minutes after rerouting is done. During the rerouteing and this 5 minutes, the load balancer in replacement deployment environment keeps doing the health check by sending a request to health check API endpoint of our case project. CodeDeploy read the health status from the load balancer. If the replacement tasks set is un-healthy, CodeDeploy does rollback by rerouting incoming traffic back to origin tasks set.
+ \item If the new deployment is still healthy after 5 minutes of waiting time, CodeDeploy terminates the origin tasks set. Now the whole deploy process is done.
 \end{itemize}
-Compare with the rolling update we are using in Jenkins pipeline, the better safety of blue/green deployment reflected at, when error happens with newer version of code, we can immediately roll back to the last version by switching the rerouteing to Blue \cite{UsingBlu65:online} without redeploy the previous version. Under the same circumstance, the rollback with rolling update is nevertheless takes too long time, since we have to replacing the already deployed code back to the previous version. This could cause longer downtime of the server. 
+Compare with the rolling update we are using in Jenkins pipeline, the better safety of blue/green deployment reflected at, when error happens with a newer version of code, we can immediately roll back to the last version by switching the rerouteing to Blue \cite{UsingBlu65:online} without redeploying the previous version. Under the same circumstance, the rollback with the rolling update is nevertheless taking a too long time, since we have to replace the already deployed code back to the previous version. This could cause longer downtime of the server. 
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.90\textwidth]{pics/codedeploy_steps.png}
-    \caption{CodeDeploy Dashboard}
-    \label{fig:codedeploy_steps}
+ \centering
+ \includegraphics[width=0.90\textwidth]{pics/codedeploy_steps.png}
+ \caption{CodeDeploy Dashboard}
+ \label{fig:codedeploy_steps}
 \end{figure}
 \par
-The better integration of CodeDeploy with the rest of AWS also be evidenced by the monitoring of deployed solution. Aside the existing monitoring with CloudWatch, CodeDeploy also provides us a dashboard to show the deploy progress and the traffic rerouteing process. Figure \ref{fig:codedeploy_steps} shows the dashboard of CodeDeploy that shows the status of our case project during the deployment.
+The better integration of CodeDeploy with the rest of AWS also be evidenced by the monitoring of the deployed solution. Aside from the existing monitoring with CloudWatch, CodeDeploy also provides us with a dashboard to show the deploy progress and the traffic rerouting process. Figure \ref{fig:codedeploy_steps} shows the dashboard of CodeDeploy that shows the status of our case project during the deployment.
 % In comparison, with Jenkins + AWS CIL we can not easily do the blue/green deployment. 
 % \section{Cloud Services}
 % \label{assumption}
@@ -288,90 +290,89 @@ The better integration of CodeDeploy with the rest of AWS also be evidenced by t
 
 % // Describe how AWS Fargate could Help
 % \subsection{Serverless computing}
-% // Describe how AWS lambda could Help and why do we chose it
+% // Describe how AWS lambda could Help and why do we choose it
 % \subsection{...}
 \section{Comparison between Integrated/Non-integrated Toolchain}
-In this section we discuses the difference between these two kinds of toolchains. The scope of comparison will be limited within the scope of functionality and ease of implementation. And it is only based on our experiences with the tools that used in our implementation.
+In this section, we discuss the difference between these two kinds of toolchains. The scope of comparison will be limited within the scope of functionality and ease of implementation. And it is only based on our experiences with the tools used in our implementation.
 We summarize the difference between these two toolchains as in Table \ref{tab:toolchain}.
 We will do more comparison related to the performance and cost in Chapter 5.
 \begin{table}[h]
-    \centering
-    \begin{tabular}{|c|c|c|}
-    \hline
-     &
-      \begin{tabular}[c]{@{}c@{}}Non-Integrated \\ Toolchain\end{tabular} &
-      \begin{tabular}[c]{@{}c@{}}Integrated \\ Toolchain\end{tabular} \\ \hline
+ \centering
+ \begin{tabular}{|c|c|c|}
+ \hline
+ &
+ \begin{tabular}[c]{@{}c@{}}Non-Integrated \\ Toolchain\end{tabular} &
+ \begin{tabular}[c]{@{}c@{}}Integrated \\ Toolchain\end{tabular} \\ \hline
     Open-source &
-      \begin{tabular}[c]{@{}c@{}}Open-source solution\\ existed\end{tabular} &
-      \begin{tabular}[c]{@{}c@{}}No, usually hosted \\ commercial solution\end{tabular} \\ \hline
-    \begin{tabular}[c]{@{}c@{}}Delivery \\ method\end{tabular} &
-      \begin{tabular}[c]{@{}c@{}}Each part is a stand-alone \\ tool either hosted or\\ on-promised,  depends \\ on the tools selection\end{tabular} &
-      \begin{tabular}[c]{@{}c@{}}As a single cloud \\ hosted software\end{tabular} \\ \hline
-    \begin{tabular}[c]{@{}c@{}}Implementing \\ time\end{tabular} &
+ \begin{tabular}[c]{@{}c@{}}Open-source solution\\ existed\end{tabular} &
+ \begin{tabular}[c]{@{}c@{}}No, usually hosted \\ commercial solution\end{tabular} \\ \hline
+ \begin{tabular}[c]{@{}c@{}}Delivery \\ method\end{tabular} &
+ \begin{tabular}[c]{@{}c@{}}Each part is a stand-alone \\ tool either hosted or\\ on-promised,  depends \\ on the tools selection\end{tabular} &
+ \begin{tabular}[c]{@{}c@{}}As a single cloud \\ hosted software\end{tabular} \\ \hline
+ \begin{tabular}[c]{@{}c@{}}Implementing \\ time\end{tabular} &
       Long &
       Short \\ \hline
-    \begin{tabular}[c]{@{}c@{}}Operational \\ effort\end{tabular} &
+ \begin{tabular}[c]{@{}c@{}}Operational \\ effort\end{tabular} &
       High &
       Low \\ \hline
-    \begin{tabular}[c]{@{}c@{}}Visibility \\ on status\end{tabular} &
-      \begin{tabular}[c]{@{}c@{}}Depends on tools, a \\ well-integrated toolchain \\ could gives good overview\\ on the whole toolchain.\end{tabular} &
-      \begin{tabular}[c]{@{}c@{}}Easy to see the\\ status as a whole\\ without additional \\ implementation\\ effort, low visibility\\ on under-laying \\ server since it's \\ hosted solution\end{tabular} \\ \hline
-    \begin{tabular}[c]{@{}c@{}}Extendibility\\ and tool \\ selection\\ freedom\end{tabular} &
-      \begin{tabular}[c]{@{}c@{}}Free to select tools\\ for each part of the\\ toolchain.\end{tabular} &
-      \begin{tabular}[c]{@{}c@{}}Limited integration\\ with third-party \\ tools\end{tabular} \\ \hline
-    \end{tabular}
-    \caption{Comparison of continuous delivery tools}
-    \label{tab:toolchain}
-    \end{table}
+ \begin{tabular}[c]{@{}c@{}}Visibility \\ on status\end{tabular} &
+ \begin{tabular}[c]{@{}c@{}}Depends on tools, a \\ well-integrated toolchain \\ could gives good overview\\ on the whole toolchain.\end{tabular} &
+ \begin{tabular}[c]{@{}c@{}}Easy to see the\\ status as a whole\\ without additional \\ implementation\\ effort, low visibility\\ on under-laying \\ server since it's \\ hosted solution\end{tabular} \\ \hline
+ \begin{tabular}[c]{@{}c@{}}Extendibility\\ and tool \\ selection\\ freedom\end{tabular} &
+ \begin{tabular}[c]{@{}c@{}}Free to select tools\\ for each part of the\\ toolchain.\end{tabular} &
+ \begin{tabular}[c]{@{}c@{}}Limited integration\\ with third-party \\ tools\end{tabular} \\ \hline
+ \end{tabular}
+ \caption{Comparison of continuous delivery tools}
+ \label{tab:toolchain}
+ \end{table}
 \subsection{Implementation and Cloud Deployment}
-The cloud based integrated toolchain is delivered as hosted solution in a serverless model. However we noticed that the non-integrated toolchain could be also completely serverless if we using hosted tools for all of the components. 
+The cloud based integrated toolchain is delivered as hosted solution in a serverless model. However we noticed that the non-integrated toolchain could be also completely serverless if we using hosted tools for all the components. 
 \par
 For example in our solution, we only have continuous integration pipeline which is on-promised and need to be deployed to the VM manually. If we replace Jenkins with some other hosted tools, for example, Travis CI\footnote{https://travis-ci.org/} we can actually build a fully hosted but non-integrated DevOps toolchain. But, for following reasons, it is not a satisfactory solution thus a non-integrated toolchain usually has some on-promised modules that needs operational effort and cloud knowledge.
 \begin{itemize}
-    \item The hosted tools, especially tools for continuous integration pipeline, are all closed-source commercial solution. This means there is no community support like in Jenkins, and it can usually integrates with the certain tools that supported by vendor. Besides, commercial user always need to pay for these hosted tools.
-    \item Hosted tools runs in the vendor's server, and it requests user log in to use this tool which brings additional integration difficulty. This means for two hosted toolchain to integrated with each other, it not only need to do the integration in the data transfer, but also need to connect their account system, for example, with OAuth. This additional inconvenience makes most hosted DevOps tools only do the integration support with other most most popular tools which largely limited the extendibility.
+ \item The hosted tools, especially tools for continuous integration pipeline, are all closed-source commercial solution. This means there is no community support like in Jenkins, and it can usually integrates with the certain tools that supported by vendor. Besides, commercial user always need to pay for these hosted tools.
+ \item Hosted tools runs in the vendor's server, and it requests user log in to use this tool which brings extra integration difficulty. This means for two hosted toolchain to integrated with each other, it not only need to do the integration in the data transfer, but also need to connect their account system, for example, with OAuth. This extra inconvenience makes most hosted DevOps tools only do the integration support with other most most popular tools which largely limited the extendibility.
 \end{itemize}
 Therefore, a non-integrated toolchain usually has some on-promised module in real-life use. In our deployment process, we find it requires lot of work to put an on-promised tool to cloud, especially if the developer is not familiar with the cloud platform that deploy this tools. For only deploying Jenkins we need to do following steps:
 \begin{enumerate} 
-    \item Create a cloud virtual machine (EC2 instances) for hosting the Jenkins master.
-    \item Setup IAM role for Jenkins master VM, make sure it has access to other AWS recourse that needed during build.
-    \item Setup security group and networking for the VM, makes sure it can be accessed form the internet but only accessible within company's IP range, and only port needed are opened to the public.
-    \item Install Jenkins in the VM. Research what plugin is needed and install necessary plugins.
-    \item An tedious set-up process for setup Jenkins cluster that supports the distributed build. This includes setup ECS cluster for build agent. Although Terraform makes the provision of cloud resources easier, still, prior knowledge for AWS is needed. The experiences in AWS is also needs in order to correctly configure ECS cluster that maximizing the performance of build agents.
-    \item Develop Docker image for the container that runs Jenkins agents.
-    \item Setup integration with other tools in toolchains by finding correct plugins and configure these plugins. 
+ \item Create a cloud virtual machine (EC2 instances) for hosting the Jenkins master.
+ \item Setup IAM role for Jenkins master VM, make sure it has access to other AWS recourse that needed during build.
+ \item Setup security group and networking for the VM, makes sure it can be accessed form the internet but only accessible within company's IP range, and only port needed are opened to the public.
+ \item Install Jenkins in the VM. Research what plugin is needed and install necessary plugins.
+ \item An tedious set-up process for setup Jenkins cluster that supports the distributed build. This includes setup ECS cluster for build agent. Although Terraform makes the provision of cloud resources easier, still, prior knowledge for AWS is needed. The experiences in AWS is also needs to correctly configure ECS cluster that maximizing the performance of build agents.
+ \item Develop Docker image for the container that runs Jenkins agents.
+ \item Setup integration with other tools in toolchains by finding correct plugins and configure these plugins. 
 \end{enumerate}
 Only after these steps, we can start using Jenkins as part of our toolchain.
-In comparison, the core feature of integrated toolchain in AWS is out-of-the-box feature which means there is no previous cloud knowledge needed and there is no deployment and environment configuration required before we use it. We basically free from all the steps we mentioned above.
-% Secondly, when we have a pipeline with hosted tools form different vendors, it is impossible for us to monitoring the toolchains status as a whole, we do can setup.
+In comparison, the core feature of the integrated toolchain in AWS is an out-of-the-box feature which means there is no previous cloud knowledge needed and there is no deployment and environment configuration required before we use it. We are basically free from all the steps we mentioned above.
 \subsection{Extendibility and Flexibility}
-The integrated toolchain is a hosted platform that runs by a vendor. Similar to we mentioned in 4.4.1, We find all of the current integrated toolchain are all commercial and closed sourced which has no community support. So their third-party tools integration usually only limited to popular tools. For example, AWS DevOps tools only supports 21 tools within it's "DevOps Partner Solutions" \footnote{https://aws.amazon.com/devops/partner-solutions/}. If user want to use anything except these tools, it is not possible.
+The integrated toolchain is a hosted platform that runs by a vendor. Similar to we mentioned in 4.4.1, We find all the currently integrated toolchain are all commercial and closed-source which has no community support. So the integration of their third-party tools usually only limited to popular tools. For example, AWS DevOps tools only support 21 tools within it's "DevOps Partner Solutions" \footnote{https://aws.amazon.com/devops/partner-solutions/}. If user wants to use anything except these tools, it is not possible.
 \par
-But, different with the single hosted tools we mentioned in 4.1.1, a hosted integrated DevOps toolchain mostly has everything needed for DevOps lifecycle so it is not mandatory for it to able to integrates with third party tools. Still the limitation in third party tool support might makes the software team facing trouble when they want to use certain tools which is not very supported.
+But, different with the single hosted tools we mentioned in 4.1.1, a hosted integrated DevOps toolchain mostly has everything needed for DevOps lifecycle so it is not mandatory for it to able to integrates with third-party tools. Still, the limitation in third party tool support might make the software team facing trouble when they want to use certain tools which are not very supported.
 \par
-In an non-integrated toolchain, the software team is allowed to pick any tools for each component as they want, as long as those tools can be integrated with each other. The tools in the toolchains could also be open-source, which allow so the software team modify the tools according to their need. For example, develop a plugin for Jenkins that allows the integration of company internal tool with Jenkins.
+In a non-integrated toolchain, the software team is allowed to pick any tools for each component as they want, as long as those tools can be integrated with each other. The tools in the toolchains could also be open-source, which allow so the software team modify the tools according to their need. For example, develop a plugin for Jenkins that allows the integration of company internal tool with Jenkins.
 \par
 In conclusion, in terms of extendibility and flexibility, non-integrated toolchains are better than integrated toolchain.
 \subsection{Integration Between Tools}
 As we mentioned in 4.4.1, sometimes it is hard for tools within a non-integrated toolchain to integrated with each other, especially between the hosted tools. 
-During our implementation, we also realized that, first, it requires some configuration work for tools to be able work together. Secondly, sometime the Integrated could be buggy, for example in our toolchain, the Jenkins sometimes doesn't reacts to the build triggering signal from GitHub. This means the further maintaining of the toolchain is needed by the software teams.
-In integrated toolchain, the toolchains is delivered as a single cloud-based software, each part of naturally coped with each other. This makes the integration much easier.
-The better integrating between each component also makes it easier to monitoring the toolchain as a whole.
+During our implementation, we also realized that, first, it requires some configuration work for tools to be able to work together. Secondly, sometime the Integrated could be buggy, for example in our toolchain, the Jenkins sometimes doesn't react to the build triggering signal from GitHub. This means the further maintaining of the toolchain is needed by the software teams.
+In integrated toolchain, the toolchains are delivered as a single cloud-based software, each part of naturally coped with each other. This makes integration much easier.
+The better integrating between each component also makes it easier to monitor the toolchain as a whole.
 \subsection{Visibility}
 \label{visibility}
-In 4.4.3, we mentioned that the integrated toolchain is easier to be monitored as a whole, however when comes to each single component, in our implementation, we find out that integrated toolchain is lack of visibility. We met two difficulties when test two toolchain. The firs one is that Jenkins master was having difficulty in provision and connect to the agents. Since Jenkins is basically a web service deployed in our EC2 virtual machine, We solve the problem by read the Error message within the Jenkins log file. The second problem we met was within AWS CodeDeploy. The CodeDeploy failed to deploy the case project to the ECS cluster. We could not find the reason at that time since we cannot find the log of CodeDeploy anywhere since it is not shows in the web interface, and we have no access to the underlying cloud infrastructure either. The lack of visibility is a problem with all hosted serverless services, since the users don't have the visibility to infrastructure behind the service.
+In 4.4.3, we mentioned that the integrated toolchain is easier to be monitored as a whole, however, when comes to every single component, in our implementation, we find out that integrated toolchain is lack of visibility. We met two difficulties when test two toolchain. The first one is that Jenkins master was having difficulty in the provision and connect to the agents. Since Jenkins is basically a web service deployed in our EC2 virtual machine, We solve the problem by reading the Error message within the Jenkins log file. The second problem we met was within AWS CodeDeploy. The CodeDeploy failed to deploy the case project to the ECS cluster. We could not find the reason at that time since we cannot find the log of CodeDeploy anywhere since it is not shown in the web interface, and we have no access to the underlying cloud infrastructure either. The lack of visibility is a problem with all hosted serverless services since the users don't have the visibility to the infrastructure behind the service.
 
 \section{Challenges in Implementation and Design of DevOps toolchains}
-In this section we discuss challenge that we met during the implementation. 
+In this section, we discuss the challenge that we met during the implementation. 
 \subsection{Challenge I: The Enormous and Unregulated Jenkins Plugins System}
-Jenkins has more than 1600 plugins which brings the software an amazing extendibility, which is one of the main advantage of Jenkins. However, there are two problems with Jenkins' plugins; First, there are usually more than one plugins that have the same functionality, for example there are at least 5 different plugins related to running Docker container as Jenkins agent. Second, most of plugin is developed by open-source community so the quality of these plugins is not ensured. During our implementation we find our there are two plugins that support run Jenkins agent in ECS cluster. However we find our only one actually works after tried both plugins. In addition, the documentation of Jenkins plugins sometimes are very poor. For example, the documentation of the plugin that we use for Jenkins agent is too brief to tell us how to use the plugin, it is not even mentioned the security setting needed in Jenkins master node that allows agents to connect the master node. 
+Jenkins has more than 1600 plugins which brings the software an amazing extendibility, which is one of the main advantages of Jenkins. However, there are two problems with Jenkins' plugins; First, there are usually more than one plugins that have the same functionality, for example, there are at least 5 different plugins related to running Docker container as Jenkins agent. Second, most of the plugin is developed by the open-source community so the quality of these plugins is not ensured. During our implementation, we find our there are two plugins that support run Jenkins agent in ECS cluster. However, we find our only one actually works after tried both plugins. Besides, the documentation of Jenkins plugins sometimes is very poor. For example, the documentation of the plugin that we use for Jenkins agent is too brief to tell us how to use the plugin, it is not even mentioned the security setting needed in Jenkins master node that allows agents to connect the master node. 
 \par
-As the result of above 3 factors, we spent very long time in selecting and configuring tools. And also trying solve the problem which nether mentioned in documentation and in the internet. 
+As a result of the above 3 factors, we spent a very long time in selecting and configuring tools. And also trying to solve the problem which nether mentioned in the documentation and on the internet. 
 \subsection{Challenge II: Fargate Does not Supports Container runs in Privileged Mode}
-As said per title, this is some limitation in AWS Fargate for preventing container get permission to access the critical resource on the host(underlying server hosting Fargate instances in this case). As the result, we cannot use Docker within a Docker container that runs on Fargate. This makes it impossible for us to distribute the "Build docker image" and "Push to ECR" stages to agents. Instead, we have to run them on the master. Luckily, these 2 stages takes very short time (<5s in total), so this limitation won't slow down the pipeline too much when multiple builds runs in parallel.
+As said per title, this is some limitation in AWS Fargate for preventing container get permission to access the critical resource on the host(underlying server hosting Fargate instances in this case). As a result, we cannot use Docker within a Docker container that runs on Fargate. This makes it impossible for us to distribute the "Build docker image" and "Push to ECR" stages to agents. Instead, we have to run them on the master. Luckily, these 2 stages take a very short time (<5s in total), so this limitation won't slow down the pipeline too much when multiple builds run in parallel.
 \par
-To solve these problem, a possible solution is to runs these 2 stages in AWS CodeBuild, AWS CodeBuild has support to Jenkins, which allow us to run certain Jenkins stages in CodeBuild. And CodeBuild supports fully parallel execution as in Fargate.
+To solve this problem, a possible solution is to runs these 2 stages in AWS CodeBuild, AWS CodeBuild has support to Jenkins, which allow us to run certain Jenkins stages in CodeBuild. And CodeBuild supports fully parallel execution as in Fargate.
 \subsection{Challenge III: Slow Starting Time for Agents in AWS Fargate}
-On average it takes around 60s from sending a Jenkins job to agent, to job start running in an agent. To our case project that takes 90 second to go through the whole pipeline, this is a relatively long time. During this 60s, Jenkins master node send task definition \footnote{Define specification of a container runs in ECS.} to ECS, provision a Fargate instance within ECS, then pull the image we developed for Jenkins agent, star the agent container within Fargate and then connect to the Jenkins master. This challenge is due to the nature of the serverless computing that we discussed in Chapter 2, and we believe there is not a economic why to solve the challenge with the current setup.
+On average it takes around 60s from sending a Jenkins job to agent, to job start running in an agent. To our case project that takes 90 seconds to go through the whole pipeline, this is a relatively long time. During this 60s, Jenkins master node sends task definition \footnote{Define specification of a container runs in ECS.} to ECS, provision a Fargate instance within ECS, then pull the image we developed for Jenkins agent, star the agent container within Fargate and then connect to the Jenkins master. This challenge is due to the nature of the serverless computing that we discussed in Chapter 2, and we believe there is not an economic way to solve the challenge with the current setup.
 \subsection{Challenge IV: No Enough Visibility in AWS DevOps tooling}
-As we mentioned in \ref{visibility}, the lack of visibility to underlying process, especially in CodeDeploy, caused some obstacle for us to debugging our pipeline. There was a problem when we try to deploy the case project to the ECS with blue/green deployment, and the CodeDeploy sucked in the creating replacement service. We know there was something wrong within either the configuration of ECS, load balancer, health-check or security/network setting. However, there is no log output of underlying deployment process in CodeDeploy. In the end we have to check everything that might caused problem one by one, and found it was the problem with failed health-check, which was very time-consuming.
+As we mentioned in \ref{visibility}, the lack of visibility to the underlying process, especially in CodeDeploy, caused some obstacle for us to debugging our pipeline. There was a problem when we try to deploy the case project to the ECS with blue/green deployment, and the CodeDeploy sucked in the creating replacement service. We know there was something wrong within either the configuration of ECS, load balancer, health-check or security/network setting. Yet, there is no log output of the underlying deployment process in CodeDeploy. In the end, we have to check everything that might be caused problem one by one and found it was the problem with failed health-check, which was very time-consuming.
