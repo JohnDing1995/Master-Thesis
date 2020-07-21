@@ -89,7 +89,7 @@ Created by Kohsuke Kawaguchi in 2001, Jenkins is an open-source continuous integ
 \par
 Our continuous delivery pipeline is built with Pipeline plugin\footnote{https://www.jenkins.io/doc/book/pipeline/} in Jenkins.
 Pipeline plugin allows us to define a continuous delivery pipeline as code in Jenkinsfile.
-In the pipeline, a conceptually distinct subset of tasks within the continuous delivery pipeline \cite{Pipeline85:online} is defined as a "stage"\footnote{For example, "Build", Test", "Deploy" step in a continuous delivery pipeline.} and each task within a step is called "step". Each pipeline is binding with a "project". An execution runtime of a project/pipeline is called "build", and the machine (virtual machine, container, etc.) for running the build is called "agent".
+In the pipeline, a conceptually distinct subset of tasks within the continuous delivery pipeline \cite{Pipeline85:online} is defined as a "stage"\footnote{For example, "Build", Test", "Deploy" step in a continuous delivery pipeline.} and each task within a step is called "step". Each pipeline is binding with a "project". An execution runtime of a project/pipeline is called "build", and the machine (virtual machine, container, e.t.) for running the build is called "agent".
 \paragraph[]{Build \& Test Automation Tool}
 For the build stage within Jenkins pipeline, we use Gradle\footnote{https://gradle.org/} as the build tool.
 Gradle is a powerful build tool initially designed for JVM based language, but now it also supports other programming languages, for example, C++ and Python. Like Jenkins, Gradle also has a dynamic ecosystem with thousands of plugin. This enables the possibility to use different kinds of tools such as unit testing and code analysis within a single pipeline of Gradle. Gradle also makes the dependency management easy, and dependencies could be easily added to the project by editing the Gradle configure file of the project. Furthermore, Gradle supports configuration as code. This allows developers to define all the build configurations of a software project in a single file.
@@ -234,7 +234,7 @@ AWS provides a set of serverless DevOps tooling which could help us build a comp
  \label{fig:codepipeline}
 \end{figure}
 \subsection{Continuous Delivery Pipeline with AWS CodePipeline}
-The workflow of our continuous delivery pipeline is the same as the pipeline in \ref{CD}. Instead of Jenkins, which is server-based, we build the pipeline with AWS CodePipeline. Figure \ref{fig:codepipeline} shows the activity within the CodePipeline in a single graph. Different from Jenkins who can do the whole continuous delivery process solely with the help of plugins, the CodePipeline just provides a platform which the developemt team can configure a workflow with AWS DevOps tooling or other third-party tools. 
+The workflow of our continuous delivery pipeline is the same as the pipeline in \ref{CD}. Instead of Jenkins, which is server-based, we build the pipeline with AWS CodePipeline. Figure \ref{fig:codepipeline} shows the activity within the CodePipeline in a single graph. Different from Jenkins who can do the whole continuous delivery process solely with the help of plugins, the CodePipeline just provides a platform which the development team can configure a workflow with AWS DevOps tooling or other third-party tools. 
 \par
 Same within the non-integrated version, we used GitHub as the version control system, and it has the same role as it has in the non-integrated toolchain. Although AWS also provides version control solution which is CodeCommit. It still lacks the functionality of collaboration compared with GitHub. Also, GitHub is already a serverless solution with good integration with AWS DevOps tooling, so we do not need to change our version control system away from GitHub. 
 \par
@@ -292,7 +292,28 @@ The better integration of CodeDeploy with the rest of AWS also be evidenced by t
 % \subsection{Serverless computing}
 % // Describe how AWS lambda could Help and why do we choose it
 % \subsection{...}
-\section{Comparison between Integrated/Non-integrated Toolchain}
+\subsection{Integration of AWS DevOps Tools with CodeStar}
+In 4.3.1, we introduce how do we integrate different stages in the continuous delivery pipeline (CD pipeline) with CodePipeline. However, an integrated continuous delivery pipeline is not called integrated toolchain. The DevOps toolchain is centred with the continuous delivery pipelines, but the pipeline is not all of the toolchains. To integrate other AWS tools with the CD pipeline and get the integrated toolchain, we use CodeStar.  
+\par
+Figure \ref{fig:codestar} show the user interface of the CodeStar dashboard. We can see, besides the CodePipeline, the CodeStar also integrate tools like monitoring, project management, and version control and then compose our integrated toolchain. In conclusion, the AWS integrated toolchain includes the following tools:
+\begin{itemize}
+     \item \textbf{CodeStar}: Integrate below tools into a signal toolchain. With project management functionality. The project management could be extended by integrating with third-party tools, i.e. Jira.
+          \item \textbf{CodePipeline}: Modelling Continuous Delivery Workflow, integrate tools that used within the CD pipeline.
+          \begin{itemize}
+               \item \textbf{CodeBuild}: Build code of the software project.
+               \item \textbf{CodeDeploy}: Deployment and monitoring.
+               \item \textbf{GitHub}: Version control.
+          \end{itemize}
+          \item \textbf{CloudWatch}: Monitoring deployed solution.
+\end{itemize}
+\begin{figure}[h]
+     \centering
+     \includegraphics[width=0.99\textwidth]{pics/codestar.png}
+     \caption{CodeStar Dashboard}
+     \label{fig:codestar}
+    \end{figure}
+
+\section{Comparison between Integrated and Non-integrated Toolchain}
 In this section, we discuss the difference between these two kinds of toolchains. The scope of comparison will be limited within the scope of functionality and ease of implementation. Furthermore, it is only based on our experiences with the tools used in our implementation.
 We summarize the difference between these two toolchains as in Table \ref{tab:toolchain}.
 We will do more comparison related to the performance and cost in Chapter 5.
@@ -344,7 +365,7 @@ Therefore, a non-integrated toolchain usually has some on-promised module in rea
  \item Setup integration with other tools in toolchains by finding correct plugins and configure these plugins. 
 \end{enumerate}
 Only after these steps, we can start using Jenkins as part of our toolchain.
-In comparison, the core feature of the integrated toolchain in AWS is an out-of-the-box feature which means there is no previous cloud knowledge needed, and there is no deployment and environment configuration required before we use it. We are basically free from all the steps we mentioned above.
+In comparison, the core feature of the integrated toolchain in AWS is an out-of-the-box feature which means there is no previous cloud knowledge needed, and there is no deployment and environment configuration required before we use it. We are free from all the steps we mentioned above.
 \subsection{Extendibility and Flexibility}
 The integrated toolchain is a hosted platform that runs by a vendor. Similar to we mentioned in 4.4.1, We find all the currently integrated toolchain are all commercial and closed-source which has no community support. So the integration of their third-party tools usually only limited to popular tools. For example, AWS DevOps tools only support 21 tools within it is "DevOps Partner Solutions" \footnote{https://aws.amazon.com/devops/partner-solutions/}. If the user wants to use anything except these tools, it is not possible.
 \par
@@ -354,7 +375,7 @@ A non-integrated toolchain allows the software team to pick any tools for each c
 \par
 In conclusion, in terms of extendibility and flexibility, non-integrated toolchains are better than integrated toolchain.
 \subsection{Integration Between Tools}
-As we mentioned in 4.4.1, sometimes it is hard for tools within a non-integrated toolchain to integrate with each other, especially between the hosted tools. 
+As we mentioned in 4.4.1, sometimes it is hard for tools within a non-integrated toolchain to integrate, especially between the hosted tools. 
 During our implementation, we also realized that, first, it requires some configuration work for tools to be able to work together. Secondly, sometime the Integrated could be buggy, for example, in our toolchain, the Jenkins sometimes does not react to the build triggering signal from GitHub. This means the software teams need further maintaining of the toolchain.
 In integrated toolchain, the toolchains are delivered as a single cloud-based software, each part of naturally coped with each other, which makes integration much easier.
 The better integrating between each component also makes it easier to monitor the toolchain as a whole.
