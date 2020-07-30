@@ -47,8 +47,8 @@ For answer RQ1 and RQ2, we implement both traditional non-integrated and integra
 To further facilitate the answer to RQ1, our next step of the study is an experiment.
 The experiments are done by comparing the metrics measured from the toolchain with and without using certain serverless computing service from AWS. The metrics cover different perspectives includes cost, performance and development difficulties. 
 \par
-To answer RQ2, The non-integrated toolchain is used to compare with the DevOps toolchain build by the DevOps tools provided by AWS as a service.
-Besides, we conduct a study on a comparison between an AWS based traditional toolchain and the out-of-box integrated DevOps toolchains also provided by AWS as services. The reason that we keep the comparison scope within AWS is that both two toolchains are runs on the same hardware setup provided by AWS, this could eliminate the errors caused by the difference between vendors and focuses on the difference between toolchains.
+To answer RQ2, The non-integrated toolchain is used to compare with the integrated DevOps toolchain build by the AWS DevOps tools.
+Besides, we conduct a study on a comparison between an AWS based traditional toolchain and this out-of-box integrated DevOps toolchain that also provided by AWS. The reason that we keep the comparison scope within AWS is that by doing this, we make sure that hardware in both toolchains are from AWS, this could eliminate the errors caused by the hardware difference between vendors and focuses on the difference caused by toolchains themselves.
 \par
 In the experiment for answering RQ2, we simulate the same DevOps lifecycle of a demo Spring Boot web app on both toolchains. We again measure the metrics in these two toolchains. The process is similar to what we do on RQ1.
 For software development teams, it could provide better insights on how to select the DevOps toolchains.
@@ -61,7 +61,7 @@ For software development teams, it could provide better insights on how to selec
 %     \item Performance: The performance of the Continues Delivery pipeline, for the same task, how long will it take for the whole process?
 % \end{itemize}
 \section{Thesis Structure and Main Contributions}
-In Chapter 2, we introduce concepts within the scope of DevOps. We also include the concepts in cloud computing which is related to our research. Chapter 3 is focusing on a survey on serverless computing technologies which the DevOps toolchain could make use of. Chapter 4 focuses on the designed and the implementation of our DevOps toolchains(both non-integrated and integrated). Chapter 5 focuses on the experiments and evaluations, which show how does the serverless computing services introduced in CH3 could benefit DevOps toolchain, and how these two kinds of toolchains we mentioned earlier compared with each other. We finally summarise our research and answer the research questions in Chapter 6.
+In Chapter 2, we introduce concepts within the scope of DevOps. We also introduce the concepts in cloud computing which is related to our research. Chapter 3 is focusing on a survey on serverless computing technologies which the DevOps toolchain could make use of. Chapter 4 focuses on the designed and the implementation of our DevOps toolchains(both non-integrated and integrated). Chapter 5 focuses on the experiments and evaluations, which show how does the serverless computing services introduced in CH3 could benefit DevOps toolchain, and how these two kinds of toolchains we mentioned earlier compared with each other. We finally summarise our research and answer the research questions in Chapter 6.
 \par
 The main contributions of this thesis project are:
 \begin{itemize}

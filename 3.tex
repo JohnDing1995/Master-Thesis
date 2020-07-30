@@ -1,19 +1,20 @@
 \chapter{Overview of Current Serverless Cloud Services Offering}
 In this chapter, we will introduce the serverless cloud services in Amazon Web Services (AWS) that we will use in the DevOps toolchain and the experiments.
- In 3.1, we introduce the AWS Elastic Container Services and AWS Fargate. In 3.2 we introduce the AWS Lambda and AWS CloudWatch in 3.3. We introduce AWS DevOps tooling in 3.4.
+ In 3.1, we introduce the AWS Elastic Container Services and AWS Fargate. In 3.2 we introduce the AWS Lambda and AWS CloudWatch in 3.3. We introduce AWS DevOps tools in 3.4.
 \section{AWS Elastic Container Services with Fargate}
 In our toolchain, we make use of Elastic Container Services with Fargate to run the Jenkins build agent. In this section, we introduce ECS and Fargate, and how do they combine to host the serverless Docker container.
 \subsection{AWS Elastic Container Service(ECS)}
-Amazon Elastic Container Service is a service in AWS to run Docker containers on managed EC2 cluster or AWS Fargate, the serverless container service in AWS. AWS fully manages the ECS service, which means AWS will take care of part of the operational task, for example, auto-scaling of the running container. To introduce how does a container run on ECS, we first introduce several concepts.
+Amazon Elastic Container Service is a service in AWS that runs Docker containers on managed EC2 cluster or AWS Fargate. AWS fully manages the ECS service, which means AWS will take care of part of the operational task, for example, auto-scaling of the running container. To introduce how does a container run on ECS, we first introduce several concepts.
 \paragraph{Task:} Task means a container instance that runs in the ECS cluster. A task is defined by task definition, which is a JSON file that contains the following information: container definition, network, hardware configuration and launch type. The task is the instantiation of a task definition \cite{WhatisAm71:online}. The ECS task scheduler is responsible for putting the task to the cluster. 
 \paragraph{Service:} A service is an abstraction of a set of tasks that include a specified number of tasks runs simultaneously.
 \paragraph{Launch Type:} Launch type define which kind of infrastructure that the task will run on. Currently, there are two options, EC2 and Fargate. EC2 launch type means to run our containers (task) in a group of EC2 virtual machines. This launch type requires the user to create and managing EC2 VMs manually. Fargate means run containers in AWS Fargate, which is a serverless container service in AWS. This launch type does not require user provision and manages the infrastructure that runs the containers.  Our first experiment in chapter 5 will be related to a comparison between these two launch types.
 \par
-In a DevOps toolchain, ECS could be used to host the docker agent in a continuous delivery pipeline. Docker agent means run certain stages in the pipeline distributively in Docker container. Major continuous delivery tools are supporting this way. We will thoroughly introduce this use case as well in 4.2.
+When running a container on ECS, the first step is to have the task definition define the specification of the Docker container that is going to run. Then from task definition, a task is created. The ECS supports executing the above process with API, which make it easy for DevOps tools to run tasks as containers in ECS.
+In a DevOps toolchain, ECS could be used to host the Docker-based build agent in a continuous delivery pipeline. Docker-based build agent means run certain stages in the pipeline distributively in Docker container. Major continuous delivery tools are supporting this way. We will thoroughly introduce this use case as well in 4.2.
 \subsection{AWS Fargate}
-AWS Fargate is a serverless container service by AWS. It removes the need for provision, manages the server from the user's side. Fargate also follows the payment mode of serverless computing, which is paid for the runtime of each running container. 
+AWS Fargate is a serverless container service by AWS, and as we mentioned above, one of the launch types of ECS. It removes the need for provision, manages the server from the user's side. Fargate also follows the payment mode of serverless computing, which is paid for the runtime of each running container. 
 \par
-We notice that different from other serverless computing services in AWS, for example, AWS Lambda, Fargate cannot be used independently. To use Fargate, the user needs to select it as "Launch type" in Elastic Container Service. We call this method of using Fargate as "Elastic Container with Fargate" in the following chapters. Another way of using Fargate is to run pods in Fargate when deploying Kubernetes cluster to AWS Elastic Kubernetes Service (EKS). This way user could run a fully serverless Kubernetes cluster in AWS, without managing backend infrastructure which runs each pod of the cluster.
+We notice that different from other serverless computing services in AWS, for example, AWS Lambda, Fargate cannot be used independently. To use Fargate, the user needs to select it as "Launch type" in Elastic Container Service, which means the container runs under this task definition will run in Fargate.  We call this method of using Fargate as "Elastic Container with Fargate" in the following chapters. Another way of using Fargate is to run pods in Fargate when deploying Kubernetes cluster to AWS Elastic Kubernetes Service (EKS). This way user could run a fully serverless Kubernetes cluster in AWS, without managing backend infrastructure which runs each pod of the cluster.
 \section{AWS Lambda}
 AWS Lambda is the first serverless service of AWS,
 which introduced in November 2014. In AWS Lambda, the user could upload code which is called "Lambda function" to AWS Lambda. AWS Lambda runs the code in it is own managed infrastructure. The "managed" means AWS perform all administration task of backend services, include server and OS maintenance, server provision, and auto-scaling. Besides the server related task, AWS will also take care of security, monitoring and logging.
@@ -22,6 +23,7 @@ which introduced in November 2014. In AWS Lambda, the user could upload code whi
 \section{AWS CloudWatch}
 As we mentioned in chapter 2, monitoring is one of the DevOps practises. AWS CloudWatch is an AWS service that helps us easily do monitoring by provides an out-of-box monitoring solution for both infrastructure and deployed applications. 
 \par
+The core functionality of CloudWatch is to collect metrics and logs from all running AWS services under the current user, real-time display those data and save data for further analysis.
 CloudWatch supports the monitoring of all services that run in AWS, both serverless and server-based. Furthermore, it could be used to monitoring the service that runs on-premises. The monitoring in CloudWatch follows workflow as below:
 \begin{enumerate}
     \item \textbf{Collect:} The log from all services is being sent to CloudWatch. The metric includes CPU/RAM utilization et. is also being sent to CloudWatch every second.
@@ -32,7 +34,7 @@ CloudWatch supports the monitoring of all services that run in AWS, both serverl
 \end{enumerate}
 We will introduce how the CloudWatch is being used in our toolchain in chapter 4.
 \section{AWS Developer Tools}
-AWS provides a set of cloud-based tools which helps us to build an integrated DevOps toolchain. The.......se tools include the following four tools.
+AWS provides a set of cloud-based tools which helps us to build an integrated DevOps toolchain. These tools include the following four tools.
 \subsection{CodeBuild}
 CodeBuild is a fully managed build server in AWS. CodeBuild mainly takes care of the automated build and automated testing within configuration delivery. Same with all serverless services, CodeBuild free the software team from building and manage build servers.
 \par
@@ -43,6 +45,6 @@ CodeDeploy is for automating the application deployment to both AWS services and
 Besides the basic functionality as automated deployment, CodeDeploy also minimized the downtime by using advanced deployment strategies (green/blue deployment and rolling update) and continuous health checking. 
 CodeDeploy also allows user continuously monitoring the health status of deployed applications. As we mentioned in chapter 2, monitoring is one most important component of Chapter 2.
 \subsection{CodePipeline}
-CodePipeline, a tool for, is for modelling the workflow within the continuous delivery pipeline with both graphic interface and code. The user could use different DevOps tools from AWS or third party in each stage of the CodePipeline. In general, CodePipeline could connect different DevOps tools we mentioned above into an integrated continuous delivery pipeline.
+CodePipeline is for modelling the workflow within the continuous delivery pipeline with both graphic interface and code. The user could use different DevOps tools from AWS or third party in each stage of the CodePipeline. In the other way around, CodePipeline could connect different DevOps tools we mentioned above into an integrated continuous delivery pipeline.
 \subsection{CodeStar}
-CodeStar is a uniform platform that builds all DevOps tools in AWS as an integrated DevOps toolchain. We mentioned CodePipeline above which integrated different tools to an integrated continuous delivery pipeline. CodeStar beings the integration to a further step by integrating all DevOps+related tool under one roof. We will introduce what tools does CodeStar include in chapter 4, where we present our implementation of integrated DevOps toolchain in AWS.
+CodeStar is a uniform platform that joins all DevOps tools in AWS as an integrated DevOps toolchain. We mentioned CodePipeline above which integrated different tools to an integrated continuous delivery pipeline. CodeStar beings the integration to a further step by integrating all DevOps-related tool under one roof. We will introduce what tools does CodeStar include in chapter 4, where we present our implementation of integrated DevOps toolchain in AWS
