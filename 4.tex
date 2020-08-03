@@ -148,7 +148,7 @@ Note that in our Git workflow, there are several time points that we need to run
  \caption{The Stages and Distributed Build in Our Pipeline}
  \label{fig:overview}
 \end{figure}
-Figure \ref{fig:overview} shows the five Jenkins stages in our pipeline. The bottom part of this Figure shows the task distribution between the master node and agent nodes. The master node is an EC2 virtual machine while agents run on Fargate instances within an ECS cluster.
+Figure \ref{fig:overview} shows the six Jenkins stages in our pipeline. The bottom part of this Figure shows the task distribution between the master node and agent nodes. The master node is an EC2 virtual machine while agents run on Fargate instances within an ECS cluster.
 \par
 As we can see from the Figure, when the master node starts a job, it will create a Docker container in AWS Fargate as the agent. The agent will pull codes from VCS, build the code, and then send the build artifacts back to the master node. After this, the container will be terminated. The master node will continue the rest steps.
 \paragraph[]{Build Agents}
@@ -179,10 +179,18 @@ If no error returns after finishing all the above steps, the developer can open 
 After the code merged to the dev branch, the pipelines run again, this time it runs the whole pipeline. First, the pipeline executes the first two stages as in the feature branch. Now we have the Java ARchive file. The Java ARchive is an executable package of our Spring Boot application. Next step is to Dockerizing our application which generates the Docker image our application. Then we push the image to the Amazon Elastic Container Registry AWS (AWS ECR) for further use.
 \par
 \label{deploy}
-The last step of the pipeline is deployment, the pipeline pull image in ECR that we pushed in the last stage, and then deploy it to the deployment environment in ECS with AWS CIL. The deployment strategy we are using is the rolling update. In the rolling update, we are gradually replacing instances in our deployment environment with the newer version of code.
+The next step of the pipeline is deployment, the pipeline pull image in ECR that we pushed in the last stage, and then deploy it to the deployment environment in ECS with AWS CIL. The deployment strategy we are using is the rolling update. In the rolling update, we are gradually replacing instances in our deployment environment with the newer version of code.
 \par
 In the dev branch, we deploy the application to the staging environment. The deployment to staging environment should be automated. This is because the staging environment is only for testing and only visible within the team. 
-In the staging environment, we will conduct functional testing for test if our deployed API works and if it works as expected. If the deployed function passes the smoke test, this shows the deployment works as expected and ready for the deployment. The developer could now open a pull request, merge code to master branch. The pipeline will runs again, and deploy the application to the production environment, which is visible to the costumers.
+In the staging environment, we will conduct API testing (last stage shows in Figure \ref{fig:overview}) for test if our deployed API works and if it works as expected. The test is being done by trigger a Lambda function. The Lambda function sends test HTTP request to the deployed endpoints, and verify if the HTTP response is correct. When the test is done, 
+\begin{figure}[h]
+     \centering
+     \includegraphics[width=0.98\textwidth]{pics/test_result.png}
+     \caption{API Test Result (Jenkins log output)}
+     \label{fig:test-result}
+    \end{figure}
+\par
+If the deployed function passes the test, this shows the deployment works as expected and ready for the deployment. The developer could now open a pull request, merge code to master branch. The pipeline will runs again, and deploy the application to the production environment, which is visible to the customers.
 
 \subsection{Deployment Environment}
 \begin{figure}[h]
