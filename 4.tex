@@ -53,7 +53,7 @@ The toolchain implementation is based on the DevOps elements we presented in Cha
 When the developer pushes a new commit to the repository in GitHub \footnote{https://github.com/}, Github will send HTTP POST request that contains the necessary information to the Jenkins master node. Jenkins master, which triggered by the HTTP request, will create a new job for this project according to the information that the HTTP request contains. The job will first pull the latest code from the git repository, then runs the docker containers with required build environment and build the project. In the end, a docker image for running the project will be created and be pushed to the container registry of AWS. Depends on the git branch that the developer committed to, the project will be deployed to a different development environment.
 \par
 Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. We can see except version control, and the whole environment is running in Amazon Web Services. Due to the limitation of space, the internal architecture of certain components is not shown in the graph. Instead, we show them in the following sections.
-\subsection{Introduction to the Tools in the Implementation}
+\subsection{Introduction to Tools Used in the Implementation}
 One of the essential steps to build the non-integrated toolchain is to select the proper tool for each component.
 In this section, we describe our consideration when we select tools.
 \paragraph[]{Continuous Delivery Pipeline}
@@ -146,7 +146,7 @@ Several general principles followed by us when adapting GitHub flow, we refer to
 \end{itemize}
 \par
 Note that in our Git workflow, there are several time points that we need to run the continuous delivery pipeline within the toolchain. The continuous delivery pipeline will also vary with the time point within the version control workflow. We will introduce this in detail on \ref{our-ci}.
-\subsection{Continuous Delivery Pipeline with Jenkins}
+\subsection{Continuous Delivery Pipeline}
 \label{our-ci}
 \begin{figure}[h]
  \centering
@@ -154,7 +154,7 @@ Note that in our Git workflow, there are several time points that we need to run
  \caption{The Stages and Distributed Build in Our Pipeline}
  \label{fig:overview}
 \end{figure}
-Figure \ref{fig:overview} shows the six Jenkins stages in our pipeline. The bottom part of this Figure shows the task distribution between the master node and agent nodes. The master node is an EC2 virtual machine while agents run on Fargate instances within an ECS cluster.
+Figure \ref{fig:overview} shows the six Jenkins stages in our pipeline. The bottom part of this Figure shows the task distribution between the master node and agent nodes. The master node is an EC2 virtual machine while agents run on Fargate instances within an ECS cluster. In section 2.3.1 we mentioned that the development of the monitoring system should be in parallel with the main software project, thus in our pipeline, the build and deploy of monitoring system is in parallel with the case project.
 \par
 As we can see from the Figure, when the master node starts a job, it will create a Docker container in AWS Fargate as the agent. The agent will pull codes from VCS, build the code, and then send the build artifacts back to the master node. After this, the container will be terminated. The master node will continue the rest steps.
 \paragraph[]{Build Agents}
@@ -217,7 +217,7 @@ When one availability zone is down, the load balancer can route the request make
 % \subsection{Smoke Testing}
 % Testing is an implement component within the DevOps pipeline
 % In this section, we further discuss the smoke testing that we mentioned in the \ref{deploy}.
-\subsection{Monitoring the Deployment}
+\subsection{Monitoring}
 Monitoring is one of the important components in the DevOps toolchain. Different from testing, which usually integrated with the continuous delivery pipeline, the monitoring is independent of the pipeline. Usually, monitoring does not act as one step within the continuous delivery pipeline but as an independent component.
 \par
 In Chapter 3, we introduced AWS CloudWatch as one of the serverless services in AWS. In our toolchain, we will use it as the tool for monitoring the cloud infrastructure. With Cloudwatch, we not only can get the realtime log from our deployed container in the ECS but also the quantitative data, for example, memory utilization and network i/o, the monitoring dashboard can seem at figure \ref{fig:monitoring}
