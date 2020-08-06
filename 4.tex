@@ -53,7 +53,7 @@ The toolchain implementation is based on the DevOps elements we presented in Cha
 When the developer pushes a new commit to the repository in GitHub \footnote{https://github.com/}, Github will send HTTP POST request that contains the necessary information to the Jenkins master node. Jenkins master, which triggered by the HTTP request, will create a new job for this project according to the information that the HTTP request contains. The job will first pull the latest code from the git repository, then runs the docker containers with required build environment and build the project. In the end, a docker image for running the project will be created and be pushed to the container registry of AWS. Depends on the git branch that the developer committed to, the project will be deployed to a different development environment.
 \par
 Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. We can see except version control, and the whole environment is running in Amazon Web Services. Due to the limitation of space, the internal architecture of certain components is not shown in the graph. Instead, we show them in the following sections.
-\subsection{Tool Selection Considerations}
+\subsection{Introduction to the Tools in the Implementation}
 One of the essential steps to build the non-integrated toolchain is to select the proper tool for each component.
 In this section, we describe our consideration when we select tools.
 \paragraph[]{Continuous Delivery Pipeline}
@@ -108,6 +108,12 @@ In our case, to build the case application, the host machine needs to have JVM i
 \par
 We also use Docker to Dockerize our application which creates a Docker image of our application.
 Docker allows us to specify all system dependencies in a single file (Dockerfile), so there is no need to have any Java environment pre-installed in the deployment environment which runs our application. This is because all environment is already being packed in our Docker image. By doing this, firstly, we reduce the operational effort. Secondly, we improve compatibility since Docker makes sure that the docker image could run in the same behaviour no matter what host machine it runs on. Also, all major cloud computing providers support Docker. We could easily run the container from our Docker image on their VM, and they are serverless computing services. This means our Dockerized application could easily be cloud-native and be deployed across a multi-cloud environment.
+\paragraph[]{Monitoring}
+We using CloudWatch for monitoring the status of the cloud infrastructure. CloudWatch is an tools provided by AWS, which we already introduced in Chapter 3. However, It's not possible for CloudWatch to give us insight about the status of Java SpringBoot application. More generally, the metrics within the application framework. In Spring Boot, these metrics are HTTP statistics, CPU load and JVM statistics. Prometheus \footnote{https://prometheus.io/}, together with Grafana could fill this gap.
+\par
+Prometheus is an open source monitoring and alerting solution initially built by SoundCloud in 2012 \cite{Overview30:online}. Prometheus is used for reading numeric metrics that are recorded in time series. In Spring Boot, there are some plugins ,for example, Micrometer \footnote{https://micrometer.io/} exist which could export all the Spring Boot specific metrics to Prometheus in time series. Thus Prometheus has perfect fit with our case project. In addition to collecting metrics, we could also set alarm within Prometheus, which could alert user when some metrics are not in normal range. We can also query the metrics from the past. Although Prometheus supports simple graph which show the metrics' change with time, it is not user friendly enough. Thus, we introduce Grafana to better visualizes the data collected by Prometheus.
+\par
+Grafana is a observation platform which it's core feature is in the visualization. Users could define dashboards according to their needs with JSON files. Another main feature if Grafana is that it could gather data from different platform into one dashboard. In our case, with Grafana, we can display the metrics from Prometheus and CloudWatch in a single page. This could gives us great overview to both Spring Boot application and cloud infrastructure as the same time.
 \subsection{Infrastructure as Code (IasC)}
 Configuration Management is one of the component of DevOps toolchain that we mentioned in Chapter 2. Infrastructure as code the common practices to implement configuration Management in the cloud-based environment.
 \begin{figure}[h]
@@ -169,7 +175,7 @@ We also notice that the Deploy stage also takes a long time. Still, we do not ha
  \label{fig:pipeline}
 \end{figure}
 \paragraph[]{Workflow for Continuous Delivery}
-Figure \ref{fig:pipeline} shows the workflow of a project that goes through our continuous delivery pipeline.
+Figure \ref{fig:pipeline} shows our proposed workflow of a project that goes through the continuous delivery pipeline.
 We can see when the event on the feature branch triggers the pipeline, and it only runs through the first two stages. This is because according to the practices of continuous integration mentioned by us in \ref{CD} and by Martin Fowler in \cite{fowler2006continuous}, a developer should merge(the "integration" in continuous integration) his/her work couple times per day. Therefore the whole pipeline will run the code with this new feature at least several times a day. This already ensures the code could frequently be tested and deployed into the test environment. Thus, in the pipeline runs after the push to the feature branch, the further steps could be skipped. 
 \par
  The developer only commits to the feature branch. The pipeline runs first two stages after a developer pushes local commits to Git. It first pulls the newly pushed code, and then build. In the build stage, the code first is analyzed, then we do unit testing to make sure the code could pass the test cases defined by the developer during development. In the end, the code will be built into Java ARchive file (.jar). The purpose of putting code analysis step first is that the code analysis will check syntax error and bugs. We want to make sure the code is runnable, and no syntax error before put it into the build. So we can reduce the cost by lowering pipeline running time if there is error exists in the code. 
@@ -214,13 +220,22 @@ When one availability zone is down, the load balancer can route the request make
 \subsection{Monitoring the Deployment}
 Monitoring is one of the important components in the DevOps toolchain. Different from testing, which usually integrated with the continuous delivery pipeline, the monitoring is independent of the pipeline. Usually, monitoring does not act as one step within the continuous delivery pipeline but as an independent component.
 \par
-In Chapter 3, we introduced AWS CloudWatch as one of the serverless services in AWS. In our toolchain, we will use it as the primary tool for monitoring. With Cloudwatch, we not only can get the realtime log from our deployed container in the ECS but also the quantitative data, for example, memory utilization and network i/o, the monitoring dashboard can seem at figure \ref{fig:monitoring}
-\begin{figure}[h]
- \centering
- \includegraphics[width=0.70\textwidth]{pics/monitoring.png}
- \caption{Cloudwatch Monitoring Dashboard}
- \label{fig:monitoring}
-\end{figure}
+In Chapter 3, we introduced AWS CloudWatch as one of the serverless services in AWS. In our toolchain, we will use it as the tool for monitoring the cloud infrastructure. With Cloudwatch, we not only can get the realtime log from our deployed container in the ECS but also the quantitative data, for example, memory utilization and network i/o, the monitoring dashboard can seem at figure \ref{fig:monitoring}
+\begin{figure}[!tbp]
+     \centering
+     \begin{minipage}[b]{0.47\textwidth}
+       \includegraphics[width=\textwidth]{pics/monitoring.png}
+     \end{minipage}
+     \hfill
+     \begin{minipage}[b]{0.50\textwidth}
+       \includegraphics[width=\textwidth]{pics/grafana.png}
+     \end{minipage}
+     \label{fig:monitoring}
+     \caption{The Monitoring Dashboard of CloudWatch (Left) and Grafana (Right)}
+   \end{figure}
+\par
+In the last paragraph of section 4.2.2, we mentioned that the CloudWatch is not capable to monitor what happens inside the application framework, in our case, Spring boot. Thus, we use Prometheus to gather the metrics within our Spring Boot application. Prometheus gather the realtime metrics with the help of Micrometer plugin of Spring boot. Micrometer exports all numeric metrics in realtime, these metrics includes, JVM statistics, CPU/RAM utilization, number of request to each API endpoint and the user's self-defined metrics within Java code. Prometheus records these metrics every second, and save the metrics in time series to Database. In addition to Prometheus, we use Grafana for read the metrics from Prometheus and display the metrics on the dashboard.
+\par
 Another service we introduced in Chapter 3 is AWS lambda. It is the most important serverless service in AWS. We also discussed how could it be used in our DevOps toolchain in which monitoring is one of the use cases. In our monitoring system, AWS lambda is used as an extension for CloudWatch, and we use it for 2 cases.
 \paragraph[]{Auto-Scaling the ECS Cluster with Custom Alarm in Cloudwatch}
 As we mentioned in \ref{fig:deploy} Deployment Environment, The deployment could be auto-scaled by defining the auto-scaling policy within the ECS cluster. However, the scaling policy is not flexible enough; it only based on thresholds on certain metrics such as CPU utilization and memory utilization. Such auto-scaling in practice is: When the watched resources utilization is above/below a certain threshold, an alarm in Cloudwatch will be triggered. The alarm will further trigger the scaling event if the scaling policy was being set before.
