@@ -42,15 +42,15 @@ The case project is a simple REST API (Figure \ref{fig:rest}) which returns the 
 \section{Design of Non-integrated DevOps Toolchain}
 In section, we present our design of non-integrated DevOps toolchain. Part of the components is still based on the virtual machine those we cannot call it a serverless toolchain as in the integrated toolchain. Each section is the introduction to the design of each component. We also present the consideration when a select tool for this part of the toolchain in each section. Besides, in each section, we introduce how could serverless computing be used by this component in general and the benefits to the specific tool we select.
 \subsection{Architecture}
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=0.99\textwidth]{pics/arch-med-jenkins.png}
-\caption{Architecture diagram of our DevOps toolchain}
-\label{fig:archjenkins}
-\end{figure}
 The toolchain implementation is based on the DevOps elements we presented in Chapter 2, and the DevOps practises from Eficode. Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. In here we are only presenting architecture on a more general level. The detailed architecture of each component will be introduced in the following sections, both text and graph.
 \par
 When the developer pushes a new commit to the repository in GitHub \footnote{https://github.com/}, Github will send HTTP POST request that contains the necessary information to the Jenkins master node. Jenkins master, which triggered by the HTTP request, will create a new job for this project according to the information that the HTTP request contains. The job will first pull the latest code from the git repository, then runs the docker containers with required build environment and build the project. In the end, a docker image for running the project will be created and be pushed to the container registry of AWS. Depends on the git branch that the developer committed to, the project will be deployed to a different development environment.
+\begin{figure}[h]
+     \centering
+     \includegraphics[width=0.99\textwidth]{pics/arch-med-jenkins.png}
+     \caption{Architecture diagram of the non-integrated DevOps toolchain}
+     \label{fig:archjenkins}
+     \end{figure}
 \par
 Figure \ref{fig:archjenkins} shows the architecture of our DevOps toolchain. We can see except version control, and the whole environment is running in Amazon Web Services. Due to the limitation of space, the internal architecture of certain components is not shown in the graph. Instead, we show them in the following sections.
 \subsection{Introduction to Tools Used in the Implementation}
