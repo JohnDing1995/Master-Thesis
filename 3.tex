@@ -2,7 +2,7 @@
 In this chapter, I will introduce the serverless cloud services in Amazon Web Services (AWS) that I will use in the DevOps toolchain and the experiments.
  In 3.1, I introduce the AWS Elastic Container Services and AWS Fargate. In 3.2 I introduce the AWS Lambda and AWS CloudWatch in 3.3. I introduce AWS DevOps tools in 3.4.
 \section{AWS Elastic Container Services with Fargate}
-In our toolchain, I make use of Elastic Container Services with Fargate to run the Jenkins build agent. In this section, I introduce ECS and Fargate, and how do they combine to host the serverless Docker container.
+In my toolchain, I make use of Elastic Container Services with Fargate to run the Jenkins build agent. In this section, I introduce ECS and Fargate, and how do they combine to host the serverless Docker container.
 \subsection{AWS Elastic Container Service(ECS)}
 Amazon Elastic Container Service is a managed container orchestration service that runs Docker containers. AWS fully manages the ECS service, which means that AWS will be responsible for some operational tasks, such as automatically scaling the running container. In order to introduce how the container runs on ECS, I first introduce a few concepts.
 \paragraph{Task:} Task means a container instance that runs in the ECS cluster. A task is defined by task definition, which is a JSON file that contains the following information: container definition, network, hardware configuration and launch type. The task is the instantiation of a task definition \cite{WhatisAm71:online}. The ECS task scheduler is responsible for putting the task to the cluster. 
@@ -13,7 +13,7 @@ The workflow for running an container in ECS is as follows:
 The first step is to have the task definition define the specification of the Docker container that is going to run. In the next step, a task defined by this task definition is created.
 \par
 In the DevOps tool chain, ECS can be used to host Docker-based build agents in the continuous delivery pipeline. Docker-based build agent means running certain stages in the pipeline distributed in Docker containers. 
-ECS supports the use of APIs to perform the two steps we mentioned in last paragraph, which makes it easy for DevOps tools to deploy Docker-based build agents to ECS cluster.
+ECS supports the use of APIs to perform the two steps I mentioned in last paragraph, which makes it easy for DevOps tools to deploy Docker-based build agents to ECS cluster.
 Major continuous delivery tools support the Docker-based build agent. 
 I will thoroughly introduce the Docker-based build agent in 4.2.
 \subsection{AWS Fargate}
@@ -24,7 +24,7 @@ I notice that different from other serverless computing services in AWS, for exa
 AWS Lambda is AWS’s first serverless service,
 It was launched in November 2014. In AWS Lambda, users can upload codes called "Lambda functions" to AWS Lambda. AWS Lambda runs the code in its own hosting infrastructure. "Managed" refers to AWS performing all management tasks of back-end services, including server and OS maintenance, server configuration, and scaling. In addition to server-related tasks, AWS will also be responsible for security, monitoring, and logging.
 \par
-AWS Lambda is event-driven, which means that when an incoming event triggers the function, the deployed lambda function will start running. I introduced the characteristics and applications of even driving in 2.4.2. In addition, AWS allows user to associate Lambda functions with other AWS services. This means that changes in AWS services can be used to trigger our Lambda functions. The combination of even-numbered driving characteristics and association with AWS services allows user to extend the functionality of AWS services. I will introduce how to use this combination in Chapter 4.
+AWS Lambda is event-driven, which means that when an incoming event triggers the function, the deployed lambda function will start running. I introduced the characteristics and applications of even driving in 2.4.2. In addition, AWS allows user to associate Lambda functions with other AWS services. This means that changes in AWS services can be used to trigger my Lambda functions. The combination of even-numbered driving characteristics and association with AWS services allows user to extend the functionality of AWS services. I will introduce how to use this combination in Chapter 4.
 \section{AWS CloudWatch}
 As I mentioned in chapter 2, monitoring is one of the DevOps practises. AWS CloudWatch is a monitoring and observability service \cite{AmazonCl65:online}. It providing an out-of-box monitoring solution for both infrastructure and deployed applications. CloudWatch could also helps on resource utilization and gives an uniform platform to monitoring operational health of the infrastructure in both AWS and on-premises. In addition, CloudWatch gives a complete visibility to AWS infrastructure status, because CloudWatch natively integrates with over 70 AWS cloud services \cite{AmazonCl65:online}.
 \par
@@ -37,7 +37,7 @@ CloudWatch supports monitoring all services running in serverless and server-bas
     When certain metrics reach the value set in the CloudWatch alarm, the alarm will trigger the action set by the user. A common use case is to set an alarm about CPU usage and use that alarm to trigger auto-scaling. Alarm actions may also trigger Lambda functions.
     \item \textbf{Analyze:} CloudWatch can save logs and analyze them later. The analysis includes customizable indicators, contributor insights and log analysis.
 \end{enumerate}
-I will introduce how the CloudWatch is being used in our toolchain in chapter 4.
+I will introduce how the CloudWatch is being used in my toolchain in chapter 4.
 \section{AWS Developer Tools}
 AWS provides a set of cloud-based tools which helps user to build an integrated DevOps toolchain. These tools include the following four tools.
 \subsection{CodeBuild}
@@ -53,4 +53,4 @@ CodeDeploy also allows users to continuously monitor the running status of deplo
 CodePipeline is for modelling the workflow within the continuous delivery pipeline with both graphic interface and code. The user could use different DevOps tools from AWS or third party in each stage of the CodePipeline. In the other way around, CodePipeline could connect different DevOps tools I mentioned above into an integrated continuous delivery pipeline. These tools include AWS DevOps tools such as CodeCommit, CodeDeploy, CodeBuild; Third-party tools such as GitHub, Jenkins, XebiaLabs etc. \footnote{See https://aws.amazon.com/codepipeline/product-integrations/}
 \subsection{CodeStar}
 CodeStar is a uniform platform that joins AWS DevOps tools as an integrated DevOps toolchain. I mentioned CodePipeline above which integrated different tools to an integrated continuous delivery pipeline, while CodeStar brings the integration to a further step.
-I will introduce what tools does CodeStar include in section \ref{codestar} where I present our implementation of integrated DevOps toolchain in AWS.
+I will introduce what tools does CodeStar include in section \ref{codestar} where I present my implementation of integrated DevOps toolchain in AWS.
