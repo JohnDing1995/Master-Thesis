@@ -1,7 +1,10 @@
 % This document provides the style to be used for a MSc Thesis at the
 % Parallel and Distributed Systems group
 \documentclass[11pt,twoside,a4paper,openright]{report}
-
+\usepackage[hyphens]{url}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{breaklinks=true}
+\urlstyle{same}
 % use babel for proper hyphenation
 \usepackage[british]{babel}
 % Graphics: like the DUT logo on the front cover
@@ -80,7 +83,7 @@
 \include{conclusionsandfuturework}
 
 % BIBLIOGRAPHY
-
+\Urlmuskip=0mu plus 1mu\relax
 \bibliographystyle{unsrt}
 \bibliography{bib/article,bib/booklet,bib/inbook,bib/inproceedings,bib/misc,bib/phdthesis,bib/technicalreport,bib/book,bib/conference,bib/incollection,bib/manual,bib/mscthesis,bib/proceedings,bib/unpublished}
 % \appendix
