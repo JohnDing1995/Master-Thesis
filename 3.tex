@@ -1,13 +1,14 @@
 \chapter{Overview of Current Serverless Cloud Services Offering in AWS}
 In this chapter, we will introduce the serverless cloud services in Amazon Web Services (AWS) that we will use in the DevOps toolchain and the experiments.
- In 3.1, we introduce the AWS Elastic Container Services and AWS Fargate. In 3.2, we introduce the AWS Lambda and AWS CloudWatch in 3.3. we introduce AWS DevOps tools in 3.4.
+\par
+In Section 3.1, we introduce the AWS Elastic Container Services, the container orchestration services and AWS Fargate, which allow user runs containers with ECS in a serverless way. In Section 3.2, we introduce the AWS Lambda, the serverless cloud function service. We introduce AWS CloudWatch, the monitoring service of AWS in Section 3.3. Lastly, we introduced AWS DevOps tools in Section 3.4.
 \section{AWS Elastic Container Services with Fargate}
 In our toolchain, we make use of Elastic Container Services with Fargate to run the Jenkins build agent. In this section, we introduce ECS and Fargate, and how do they combine to host the serverless Docker container.
 \subsection{AWS Elastic Container Service(ECS)}
 Amazon Elastic Container Service is a managed container orchestration service that runs Docker containers. AWS fully manages the ECS service, which means that AWS will be responsible for some operational tasks, such as automatically scaling the running container. To introduce how the container runs on ECS, we first introduce a few concepts.
 \paragraph{Task:} Task means a container instance that runs in the ECS cluster. A task is defined by task definition, which is a JSON file that contains the following information: container definition, network, hardware configuration and launch type. The task is the instantiation of a task definition \cite{WhatisAm71:online}. The ECS task scheduler is responsible for putting the task to the cluster. 
 \paragraph{Service:} A service is an abstraction of a set of tasks that include a specified number of tasks runs simultaneously.
-\paragraph{Launch Type:} Launch type defines on which infrastructure the task will run. Currently, there are two options, EC2 (virtual machine) and Fargate (serverless). The EC2 launch type refers to running the container (task) in a group of EC2 virtual machines. This launch type requires the user to manually create and managing EC2 VMs. The Fargate launch type means run containers in AWS Fargate, and Fargate is a serverless container service in AWS. This launch type does not require user provisioning and managing the infrastructure that runs the containers. Instead, AWS takes over these tasks. Our first experiment in chapter 5 will be related to a comparison between these two launch types.
+\paragraph{Launch Type:} Launch type defines on which infrastructure the task will run. Currently, there are two options, EC2 (virtual machine) and Fargate (serverless). The EC2 launch type refers to running the container (task) in a group of EC2 virtual machines. This launch type requires the user to manually create and managing EC2 VMs. The Fargate launch type means run containers in AWS Fargate, and Fargate is a serverless container service in AWS. This launch type does not require user provisioning and managing the infrastructure that runs the containers. Instead, AWS takes over these tasks. Our first experiment in Chapter 5 will be related to a comparison between these two launch types.
 \par
 The workflow for running a container in ECS is as follows:
 The first step is to have the task definition to define the specification of the Docker container that is going to run. In the next step, a task defined by this task definition is created.
@@ -26,7 +27,7 @@ It was launched in November 2014. In AWS Lambda, users can upload codes called "
 \par
 AWS Lambda is event-driven, which means that when an incoming event triggers the function, the deployed lambda function will start running. We introduced the characteristics and applications of even driving in 2.4.2. In addition, AWS allows user to associate Lambda functions with other AWS services. This means that changes in AWS services can be used to trigger our Lambda functions. The combination of even-numbered driving characteristics and association with AWS services allows user to extend the functionality of AWS services. We will introduce how to use this combination in Chapter 4.
 \section{AWS CloudWatch}
-As we mentioned in chapter 2, monitoring is one of the DevOps practises. AWS CloudWatch is a monitoring and observability service \cite{AmazonCl65:online}. It is providing an out-of-box monitoring solution for both infrastructure and deployed applications. CloudWatch could also help on resource utilization and gives a uniform platform to monitoring operational health of the infrastructure in both AWS and on-premises. In addition, CloudWatch gives complete visibility to AWS infrastructure status, because CloudWatch natively integrates with over 70 AWS cloud services \cite{AmazonCl65:online}.
+As we mentioned in Chapter 2, monitoring is one of the DevOps practises. AWS CloudWatch is a monitoring and observability service \cite{AmazonCl65:online}. It is providing an out-of-box monitoring solution for both infrastructure and deployed applications. CloudWatch could also help on resource utilization and gives a uniform platform to monitoring operational health of the infrastructure in both AWS and on-premises. In addition, CloudWatch gives complete visibility to AWS infrastructure status, because CloudWatch natively integrates with over 70 AWS cloud services \cite{AmazonCl65:online}.
 \par
 The core function of CloudWatch is to collect metrics and logs of all running AWS services under the current user, display these data in real-time and save the data for further analysis.
 CloudWatch supports monitoring all services running in serverless and server-based AWS. In addition, it can be used to monitor on-premises services. Monitoring in CloudWatch follows the following workflow:
@@ -37,7 +38,7 @@ CloudWatch supports monitoring all services running in serverless and server-bas
     When certain metrics reach the value set in the CloudWatch alarm, the alarm will trigger the action set by the user. A common use case is to set the alarm about CPU usage and use that alarm to trigger auto-scaling. Alarm actions may also trigger Lambda functions.
     \item \textbf{Analyze:} CloudWatch can save logs and analyze them later. The analysis includes customizable indicators, contributor insights and logs analysis.
 \end{enumerate}
-We will introduce how the CloudWatch is being used in our toolchain in chapter 4.
+We will introduce how the CloudWatch is being used in our toolchain in Chapter 4.
 \section{AWS Developer Tools}
 AWS provides a set of cloud-based tools which helps the user to build an integrated DevOps toolchain. These tools include the following four tools.
 \subsection{CodeBuild}

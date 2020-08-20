@@ -1,14 +1,14 @@
 \chapter{Performance Comparison and Evaluation}
-In this chapter, we describe our experiments regarding two research questions we proposed in chapter 1. The experiments based on the DevOps toolchains we implemented in Chapter 4.
+In this chapter, we describe our experiments regarding two research questions we proposed in Chapter 1. The experiments based on the DevOps toolchains we implemented in Chapter 4.
 \par
 In Section 5,1, we will examine how does the serverless compute engine for containers (Amazon ECS on AWS Fargate) could influence the performance of non-integrated toolchains. Thus, in the experiment, we implement the solution with a different type of cloud environment (with/without serverless) as a comparison group.
-In section 5.2, we focus on answering research question 2, in which we will compare the performance of continuous delivery pipeline composed of fully-managed serverless DevOps tools in AWS with our Jenkins-based pipeline that runs on the virtual machine.
+In Section 5.2, we focus on answering research question 2, in which we will compare the performance of continuous delivery pipeline composed of fully-managed serverless DevOps tools in AWS with our Jenkins-based pipeline that runs on the virtual machine.
 \section{Experiment 1: Experiment on Serverless Container Services}
-The Docker agent has already been supported by many CI/CD tools ad we introduced in chapter 4.
+The Docker agent has already been supported by many CI/CD tools ad we introduced in Chapter 4.
 The serverless container services in AWS (AWS Fargate) provides the possibility to ease the infrastructure management task for the Docker build agents.
 This experiment is a controlled experiment which examines whether serverless container service could improve the continuous delivery pipeline from various perspectives.
 \subsection{Test Task and System Description}
-In this experiment, we run the continuous delivery process of a Spring Boot web application with our DevOps toolchain. From the experiments, we could verify our assumption in chapter 3 and better-answering RQ 1.
+In this experiment, we run the continuous delivery process of a Spring Boot web application with our DevOps toolchain. From the experiments, we could verify our assumption in Chapter 3 and better-answering RQ 1.
 \par
 As we described in Chapter 4, the continuous delivery pipeline includes the following steps:
 \begin{enumerate}
@@ -95,9 +95,14 @@ The container orchestration service ECS itself is free of charge. We only pay fo
 In AWS Fargate we pay only by resource we are using and the runtime. The price for Fargate service in EU(Stockholm) is \$0.04165 per GB RAM per hour plus \$0.0049 per vCPU per hour \footnote{https://aws.amazon.com/fargate/pricing/}. Thus, in our experiment setup (2vCPU, 2 GB RAM), the price should be \$0.0931 per running agent for one hour's runtime.
 In AWS EC2 our cost depends on the type of VM we are using. The type of VM we use for running Jenkins agents is t3.small that costs \$0.0216 per hour \footnote{https://aws.amazon.com/ec2/pricing/on-demand/}. The Fargate-based Jenkins agent is more expensive than EC2-based agent.
 \par
-However, the pay-per-use characteristic of serverless service makes Fargate more competitive in terms of cost. The instance only up and run when Jenkins master distributes the job. Once the job finished, the AWS will terminate Fargate instance immediately when it finds no container is running on it. However, EC2 not so flexible due to the resource-utilisation-based scaling policy. The EC2 instance is not scaled in immediately after job finished, and the user has to pay for the instance runtime before it gets terminated -- even there is no job running in EC2 instance any more. So depends on the frequency and length the build task is, the user could have runtime per hour when using Fargate instance.
+However, the pay-per-use characteristic of serverless service makes Fargate more competitive in terms of cost. The instance only up and run when Jenkins master distributes the job. Once the job finished, the AWS will terminate Fargate instance immediately when it finds no container is running on it. However, EC2 not so flexible due to the resource-utilisation-based scaling policy. The EC2 instance is not scaled in immediately after job finished, and the user has to pay for the instance runtime before it gets terminated -- even there is no job running in EC2 instance any more. So depends on the frequency and length of the build task, the user could have runtime per hour when using Fargate instance.
 \subsection{Conclusion}
-In this experiment, we compare the serverless (AWS Fargate) and non-serverless solution (EC2) for hosting distributed continuous delivery pipeline. The experiment shows that the performance of the serverless solution is worse when it comes to single job execution, which is because of the cold-start issue with serverless computing. However, in terms of the parallel job executing, the serverless solution has better performance over traditional VM. In term of cost, the serverless solution is more expensive per hour. However, the difference could be offset by the less runtime. Moreover, resource utilisation is similar in both solutions. Table \ref{tab:exp1} show a comparison between two experimental groups.
+In this experiment, we compare the serverless (AWS Fargate) and non-serverless solution (EC2) for hosting distributed continuous delivery pipeline. The experiment shows that the performance of the serverless solution is worse when it comes to single job execution, which is because of the cold-start issue with serverless computing. However, in terms of the parallel job executing, the serverless solution has better performance over traditional VM. 
+\par
+\label{micros}
+An better parallel execution performance is meaningful for apply DevOps practice in the microservices development. A microservices could have hundred of services. In the philosophy of microservices, the release of each service should be independently \cite{dehghani2018break}. To ensure this, one practices it to use one pipeline for each service. However managing a hundred pipelines is not an easy task, and better practice is to have multiple services share a single pipeline \cite{HowtoSca9:online}. Therefore, when multiple services share the same pipeline, this improvement allows services to be released independently without waiting for each other.
+\par
+In term of cost, the serverless solution is more expensive per hour. However, the difference could be offset by the less runtime. Moreover, resource utilisation is similar in both solutions. Table \ref{tab:exp1} show a comparison between two experimental groups.
 \begin{table}[h!]
     \begin{center}
         \begin{tabular}{|l|l|l|}

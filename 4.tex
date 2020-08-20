@@ -1,8 +1,8 @@
 \chapter{Design of DevOps Toolchains}
 In this chapter, we introduce the design of both toolchains(integrated and non-integrated) and explain how we come to this implementation. We will also compare these two types of toolchains within the scope of functionality and ease of implementation.
-Note that for the experiment that is answering RQs in next chapter, we implement two different continuous delivery pipelines design with two sets of tools respectively, one with tradition non-integrated tool while another one with the serverless integrated DevOps tools from AWS.
+Note that for the experiments that are answering our two research questions in the next chapter, we implement two different continuous delivery pipelines design with two sets of tools respectively, one with tradition non-integrated tool while another one with the serverless integrated DevOps tools from AWS.
 \par
-In section 4.1, we present a case software project that uses DevOps toolchains in the experiments. In section 4.2, we introduce the design and implementation of my non-integrated DevOps toolchain. Section 4.3 is related to the integrated toolchain, and section 4.4 is a comparison between Integrated and non-integrated toolchain. Lastly, in section 4.5, we talk about the challenges we met during the implementation.
+In Section 4.1, we present a case software project that uses DevOps toolchains in the experiments. In Section 4.2, we introduce the design and implementation of my non-integrated DevOps toolchain. Section 4.3 is related to the integrated toolchain, and Section 4.4 is a comparison between Integrated and non-integrated toolchain. Lastly, in Section 4.5, we talk about the challenges we met during the implementation.
 \section{Case Project}
 We first develop the case project. The case project is an example software project which will be used to test my implementation and run the experiments in which we simulate the DevOps development process of the case project on my DevOps toolchain. 
 The case project is a RESTful API service. We use API services as case projects because such services are an essential part of modern software projects with microservices architecture. 
@@ -122,7 +122,7 @@ Second, we use Docker to Dockerize my application which creates a Docker image o
 With Docker, there is no need to pre-install any Java environment in the environment to run my application. This is because all environment is already being packed in my Docker image. 
 The second reason, Docker improved compatibility of the case project because Docker ensures that the application packed container can run in the same behaviour no matter what host it is running on.
 The last reason, all major cloud computing providers support Docker. 
-We can easily run the container on the cloud services. This means that my Dockerized applications can be easily cloud-native and can be deployed in a multi-cloud environment. For example, in AWS, there are Elastic Container Services (introduced in chapter 3) specifically for container orchestration.
+We can easily run the container on the cloud services. This means that my Dockerized applications can be easily cloud-native and can be deployed in a multi-cloud environment. For example, in AWS, there are Elastic Container Services (introduced in Chapter 3) specifically for container orchestration.
 \subsubsection{Monitoring}
 We are using CloudWatch for monitoring the status of the cloud infrastructure. CloudWatch is a tool provided by AWS, which we already introduced in Chapter 3. However, CloudWatch cannot give us insight about the status of Java SpringBoot application. More generally, the metrics within the application framework. In Spring Boot, these metrics are HTTP statistics, CPU load and JVM statistics. Prometheus \footnote{https://prometheus.io/}, together with Grafana, could fill this gap.
 \par
@@ -234,7 +234,7 @@ AWS Fargate allow us to run my containerized application without having to manag
      \label{fig:deploy}
 \end{figure}
 \par
-Figure \ref{fig:deploy} shows my deployment architecture. The deployment region in Stockholm(EU-north-1). The Fargate instances in ECS cluster are automated scaled according to the number of incoming requests.
+Figure \ref{fig:deploy} shows my deployment architecture. The deployment region in Stockholm (EU-north-1). The Fargate instances in ECS cluster are automated scaled according to the number of incoming requests.
 To improve the availability of the product, we deploy the case project into two different availability zones within the region.
 When one availability zone is down, the load balancer can route the request to ensure that the request can still reach the healthy availability zone. Besides the availability improvement, the load balancer also distributes incoming requests across Fargate instances which maximizes the resources utilization rate within my ECS cluster.
 % During deployment, we use Martin Fowler's blue and green deployment strategy \cite{fowler2010bluegreendeployment}, which is natively supported by ECS. This means when a new deployment comes, the older version will continue serving until the newer version reaches the stable status. This could significantly reduce the downtime in the deployment. 
@@ -258,7 +258,7 @@ In Chapter 3, we introduced AWS CloudWatch as one of the serverless services in 
      \label{fig:monitoring}
    \end{figure}
 \par
-In the last paragraph of section 4.2.2, we mentioned that the CloudWatch is not capable of monitoring what happens inside the application framework, in my case, Spring boot. Thus, we use Prometheus to gather the metrics within my Spring Boot application. Prometheus gather the realtime metrics with the help of Micrometer plugin of Spring boot. Micrometer exports all numeric metrics in realtime; these metrics include JVM statistics, CPU/RAM utilization, number of request to each API endpoint and the user's self-defined metrics within Java code. Prometheus records these metrics every second, and save the metrics in time series to Database. In addition to Prometheus, we use Grafana to read the metrics from Prometheus and display the metrics on the dashboard.
+In the last paragraph of Section 4.2.2, we mentioned that the CloudWatch is not capable of monitoring what happens inside the application framework, in my case, Spring boot. Thus, we use Prometheus to gather the metrics within my Spring Boot application. Prometheus gather the realtime metrics with the help of Micrometer plugin of Spring boot. Micrometer exports all numeric metrics in realtime; these metrics include JVM statistics, CPU/RAM utilization, number of request to each API endpoint and the user's self-defined metrics within Java code. Prometheus records these metrics every second, and save the metrics in time series to Database. In addition to Prometheus, we use Grafana to read the metrics from Prometheus and display the metrics on the dashboard.
 \par
 Another service we introduced in Chapter 3 is AWS lambda and discussed how could it be used in my DevOps toolchain in which monitoring is one of the use cases. In my monitoring system, AWS lambda is used as an extension for CloudWatch, and we use it for 2 cases.
 \paragraph[]{Auto-Scaling the ECS Cluster with Custom Alarm in Cloudwatch}
@@ -380,7 +380,7 @@ Figure \ref{fig:codestar} show the user interface of the CodeStar dashboard. We 
 \section{Comparison between Integrated and Non-integrated Toolchain}
 In this section, we discuss the difference between these two kinds of toolchains. The scope of comparison will be limited within the scope of functionality and ease of implementation. Furthermore, it is only based on my experiences with the tools used in my implementation.
 We summarize the difference between these two toolchains as in Table \ref{tab:toolchain}.
-We will do more comparison related to the performance and cost in chapter 5.
+We will do more comparison related to the performance and cost in Chapter 5.
 \begin{table}[h]
  \centering
  \begin{tabular}{|c|c|c|}
