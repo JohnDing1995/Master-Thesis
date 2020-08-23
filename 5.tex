@@ -20,7 +20,7 @@ As we described in Chapter 4, the continuous delivery pipeline includes the foll
 \par
 In these four steps, the step "Build", and "Checkout" is being done in parallel within the ECS cluster. As we mentioned in CH4, when the new job started in the Jenkins master server, Jenkins will provision a new container instance within the ECS cluster. The container is managed directly by AWS, so we don't need to create and manage the virtual machine that runs the container. We use this setup in our initial implementation as the control group.
 \par
-In the experimental group, we replace AWS Fargate with traditional VM, which is EC2 in the Amazon Web Services. The parallelisation pattern remains the same; this means as in the control group, only the first two steps are being run distributively in the Jenkins nodes. The EC2 instances belong to an auto-scaling group that will scale up when CPU Utilisation rate reach 70\%. The initial size for an auto-scaling group is 1.
+In the experimental group, we replace AWS Fargate with traditional VM, which is EC2 in the Amazon Web Services.The parallelisation pattern remains the same; this means as in the control group, only the first two steps are being run distributively in the Jenkins nodes. The EC2 instances belong to an auto-scaling group that will scale up when CPU Utilisation rate reach 70\%. The initial size for an auto-scaling group is 1.
 \par
 Figure \ref{fig:ex1} shows the architecture of 2 groups in this experiment. The experimental group on the left is a Jenkins server with the traditional virtual machine as workers node that hosting the container agent. The architecture of the control group on the right has agent nodes dynamically provisioned as serverless containers hosed by AWS Fargate.
 \begin{figure}[h]
@@ -124,7 +124,7 @@ In term of cost, the serverless solution is more expensive per hour. However, th
 \section{Experiment 2: Experiment on Integrated DevOps Toolchain}
 For solving the RQ2, we compare the implementation of our design of two different the DevOps toolchain -- the non-integrated Jenkins based toolchain and the AWS DevOps toolchain implementation with AWS DevOps tooling.
 \subsection{Test Task and System Description}
-This second experiment is similar to the first experiment, and we deliver our case project through two DevOps toolchains. The first toolchain is our Jenkins-based toolchain in 4.2, with agents runs on AWS Fargate. The second toolchain is the toolchain with AWS DevOps tooling that we described in 4.3.
+This second experiment is similar to the first experiment, and we deliver our case project through two DevOps toolchains. The first toolchain is our Jenkins-based toolchain in Section 4.2, with agents runs on AWS Fargate. The second toolchain is the toolchain with AWS DevOps tooling that we described in Section 4.3.
 \par
 During the experiment, we have set up as follows:
 \paragraph{Hardware}
@@ -142,16 +142,15 @@ The resource utilisation comparison is not available in the experiment since we 
 \subsection{Quantitative Experiment Result and Evaluation}
 This section shows the result of our experiment. We also give an evaluation and analysis of the reason behind the result.
 \subsubsection{Runtime}
-As in Experiment 1, we compared the running time of each toolchain under different loads \footnote{ workload refers to the different number of jobs running in parallel in the two pipelines}. We only compare the runtime without the final deploy stage. This is because, first, although we can still use the AWS toolchain to deploy to ECS in the same way as the non-integrated toolchain: by using the AWS CLI in CodeBuild to deploy. However, by doing so, we skipped CodeDeploy and instead deployed our project using CodeBuild. This is not a natural practice in production because there is another tool dedicated to deployment (CodeDeploy). Secondly, the deployment mode used in CodeDeploy is very different in terms of the speed of the deployment method used in Jenkins. 
-\par
-Figure \ref{fig:compareaws} shows the result of this experiment. The runtime of integrated toolchain increases with the number of the task runs in parallel, while the non-integrated toolchain remains stable regardless of the number of parallel tasks. We will analyse the reason later in this section.
+As in Experiment 1, we compared the running time of each toolchain under different loads \footnote{Workload refers to the different number of jobs running in parallel in the two pipelines}. We only compare the runtime without the final deploy stage. This is because, first, although we can still use the AWS toolchain to deploy to ECS in the same way as the non-integrated toolchain: by using the AWS CLI in CodeBuild to deploy. However, by doing so, we skipped CodeDeploy and instead deployed our project using CodeBuild. This is not a natural practice in production because there is another tool dedicated to deployment (CodeDeploy). Secondly, the deployment mode used in CodeDeploy is very different in terms of the speed of the deployment method used in Jenkins. 
 \begin{figure}[!h]
-    \centering
-    \includegraphics[width=0.99\textwidth]{pics/compare-aws.png}
-    \caption{Runtime of the pipeline with on Different Toolchain}
-    \label{fig:compareaws}
-    \end{figure}
-  \par
+  \centering
+  \includegraphics[width=0.80\textwidth]{pics/compare-aws.png}
+  \caption{Runtime of the pipeline with on Different Toolchain}
+  \label{fig:compareaws}
+\end{figure}
+Figure \ref{fig:compareaws} shows the result of this experiment. The runtime of integrated toolchain increases with the number of the task runs in parallel, while the non-integrated toolchain remains stable regardless of the number of parallel tasks. We will analyse the reason later in this section.
+\par
 From Figure \ref{fig:stage_runtime}, we can see that during the execution of a single job, tow toolchains have similar runtime. The similar runtime is because the build stage, which takes most of the runtime, is running in a similar environment in both toolchains. Both execution environment is within a Docker container runs with the same hardware in AWS. Although, the Docker image for the container is different in two toolchains, and we are not sure what if the actual hardware is the same since we have no visibility to the hardware in both toolchains. However, still, the performance is not so different in both toolchains.
 \par
 We further observe the time allocation between stages within the runtime in both toolchains. The figure shows our observation. To get the runtime in Figure \ref{fig:stage_runtime}, we run the pipeline in each toolchain for five times and get the average runtime of each stage. The first difference shows in Figure \ref{fig:stage_runtime} is that the Git Checkout stage in AWS integrated toolchain does not run on the container build agent. Instead, it is running in the unknown environment fully managed by AWS.
@@ -168,13 +167,13 @@ We observed that it takes 10 seconds to do the git checkout when using third-par
  The second difference is that in AWS integrated toolchain, the provisioning of the build environment is much faster. We presume this is due to AWS manages both build agent and this toolchain, and AWS is optimising the provisioning process of the build environment. Furthermore, the cloud instance that runs build environment in CodeBuild might already be started (used for the build task of other users) before CodePipeline sends our build job to CodeBuild. On the other hand, instances (Fargate) that run Jenkins agents is a cold start, which means it is not running before we send build job there.
  Nevertheless, we can also notice that the build time in the AWS integrated toolchain takes a longer time. It is hard for us to find the reason since the hardware configuration used by AWS is unknown except the size of RAM and the number of virtual CPU.
 \par
- Also, we observe that with the workload goes up, the runtime of AWS integrated toolchain increases with it. We already answered why the runtime of the pipeline in our non-integrated toolchain with agent runs in AWS Fargate does not change over time in 5.1.3. To explain this, we also check the runtime of each stage when runs several jobs in parallel. We notice that when it has multiple jobs runs in parallel, essential if the parallel jobs' number goes over 5. AWS will start limiting the resource allocation, which limits the number of jobs that runs at the same time. As a result, part of our running jobs has to enter the "Queued" status before entering the "Provisioning" stage. In 10 jobs we run in parallel for the experiment, the time spent for queuing for resource various from 1 second (get resource allocated directly) to 130 seconds. Among these ten jobs, four jobs were put into the queue before resource are available to them. Figure \ref{fig:queued} shows the distribution of queued time among jobs. This validates the claim from AWS about parallel execution ability, which we mentioned in \ref{aws_parallel}. However, the parallel pipeline execution is not fully in parallel but with some limitations on available resources.
+ Also, we observe that with the workload goes up, the runtime of AWS integrated toolchain increases with it. We already answered why the runtime of the pipeline in our non-integrated toolchain with agent runs in AWS Fargate does not change over time in Section 5.1.3. To explain this, we also check the runtime of each stage when runs several jobs in parallel. We notice that when it has multiple jobs runs in parallel, essential if the parallel jobs' number goes over 5. AWS will start limiting the resource allocation, which limits the number of jobs that runs at the same time. As a result, part of our running jobs has to enter the "Queued" status before entering the "Provisioning" stage. In 10 jobs we run in parallel for the experiment, the time spent for queuing for resource various from 1 second (get resource allocated directly) to 130 seconds. Among these ten jobs, four jobs were put into the queue before resource are available to them. Figure \ref{fig:queued} shows the distribution of queued time among jobs. This validates the claim from AWS about parallel execution ability, which we mentioned in Section \ref{aws_parallel}. However, the parallel pipeline execution is not fully in parallel but with some limitations on available resources.
  \begin{figure}[!h]
   \centering
-  \includegraphics[width=0.99\textwidth]{pics/queued_time.png}
+  \includegraphics[width=0.90\textwidth]{pics/queued_time.png}
   \caption{Observation of Queued Time in AWS Integrated Toolchain During The runtime Experiment, When 10 Jobs Run in Parallel}
   \label{fig:queued}
-  \end{figure}
+\end{figure}
  \par
  The runtime of the non-integrated toolchain is also slightly going up because of the runtime of the build and push container to ECR increases. The reason is obvious, we have these two stages runs on the master node, so the increased data transfer between agent and master and limited computing resource on the Jenkins master increase the runtime. However, as we observed in Experiment 1, the build stage is always fully paralleled, and the runtime of this stage remains unchanged despite the increasing workload. The queuing time for resource in each job is negligible.
  \subsubsection{Cost Analysis}
@@ -188,7 +187,7 @@ By analysing and explain the results, we could see that two toolchains have simi
 The software project in real-life software development is much larger, and as a result, the build time will take a larger proportion in the total runtime. Therefore, the AWS integrated toolchain may become slower since it's building is slower than Jenkins non-integrated toolchain.
 From the parallel execution part, we conclude that with our AWS integrated toolchain, the AWS CodeBuild, which takes most of the runtime, do have a limitation on the resource that we can use at the same time. Thus, before the system provisioning any resource, some tasks have to wait for the resource allocation in the "Queued" status. The "Queued" status largely prolongs the total runtime. 
 \par
-In general, the AWS integrated toolchain is more expensive and slower than our Jenkins-centred non-integrated toolchain, note that this does not mean the non-integrated is better than integrated toolchain. As we discussed in the last chapter, the AWS integrated toolchain is easier and faster to implement, is more stable and with better customer support. Table \ref{tab:exp2} shows the result of this experiment.
+In general, the AWS integrated toolchain is more expensive and slower than our Jenkins-centred non-integrated toolchain, note that this does not mean the non-integrated is better than integrated toolchain. As we discussed in the last chapter, the AWS integrated toolchain is easier and faster to implement, is more stable and with better customer support. Table \ref{tab:exp2} summarised the result of this experiment.
 \begin{table}[]
     \centering
     \begin{tabular}{|l|l|l|}

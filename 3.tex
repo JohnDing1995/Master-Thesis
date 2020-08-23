@@ -16,7 +16,7 @@ The first step is to have the task definition to define the specification of the
 In the DevOps toolchain, ECS can be used to host Docker-based build agents in the continuous delivery pipeline. Docker-based build agent means running certain stages in the pipeline distributed in Docker containers. 
 ECS supports the use of APIs to perform the two steps we mentioned in the last paragraph, which makes it easy for DevOps tools to deploy Docker-based build agents to ECS cluster.
 Major continuous delivery tools support the Docker-based build agent. 
-We will thoroughly introduce the Docker-based build agent in 4.2.
+We will thoroughly introduce the Docker-based build agent in Section 4.2.
 \subsection{AWS Fargate}
 AWS Fargate is a serverless container service by AWS, and as we mentioned above, one of the launch types of ECS. It removes the need for provision, manages the server from the user's side. Fargate also follows the payment mode of serverless computing, which is paid for the runtime of each running container. 
 \par
@@ -25,7 +25,7 @@ We notice that different from other serverless computing services in AWS, for ex
 AWS Lambda is AWS's first serverless service,
 It was launched in November 2014. In AWS Lambda, users can upload codes called "Lambda functions" to AWS Lambda. AWS Lambda runs the code in its own hosting infrastructure. "Managed" refers to AWS performing all management tasks of back-end services, including server and OS maintenance, server configuration, and scaling. In addition to server-related tasks, AWS will also be responsible for security, monitoring, and logging.
 \par
-AWS Lambda is event-driven, which means that when an incoming event triggers the function, the deployed lambda function will start running. We introduced the characteristics and applications of even driving in 2.4.2. In addition, AWS allows user to associate Lambda functions with other AWS services. This means that changes in AWS services can be used to trigger our Lambda functions. The combination of even-numbered driving characteristics and association with AWS services allows user to extend the functionality of AWS services. We will introduce how to use this combination in Chapter 4.
+AWS Lambda is event-driven, which means that when an incoming event triggers the function, the deployed lambda function will start running. We introduced the characteristics and applications of even driving in Section 2.4.2. In addition, AWS allows user to associate Lambda functions with other AWS services. This means that changes in AWS services can be used to trigger our Lambda functions. The combination of even-numbered driving characteristics and association with AWS services allows user to extend the functionality of AWS services. We will introduce how to use this combination in Chapter 4.
 \section{AWS CloudWatch}
 As we mentioned in Chapter 2, monitoring is one of the DevOps practises. AWS CloudWatch is a monitoring and observability service \cite{AmazonCl65:online}. It is providing an out-of-box monitoring solution for both infrastructure and deployed applications. CloudWatch could also help on resource utilization and gives a uniform platform to monitoring operational health of the infrastructure in both AWS and on-premises. In addition, CloudWatch gives complete visibility to AWS infrastructure status, because CloudWatch natively integrates with over 70 AWS cloud services \cite{AmazonCl65:online}.
 \par
@@ -54,4 +54,4 @@ CodeDeploy also allows users to continuously monitor the running status of deplo
 CodePipeline is for modelling the workflow within the continuous delivery pipeline with both graphic interface and code. The user could use different DevOps tools from AWS or third party in each stage of the CodePipeline. In the other way around, CodePipeline could connect different DevOps tools we mentioned above into an integrated continuous delivery pipeline. These tools include AWS DevOps tools such as CodeCommit, CodeDeploy, CodeBuild; Third-party tools such as GitHub, Jenkins, XebiaLabs etc. \footnote{See https://aws.amazon.com/codepipeline/product-integrations/}
 \subsection{CodeStar}
 CodeStar is a uniform platform that joins AWS DevOps tools as an integrated DevOps toolchain. We mentioned CodePipeline above which integrated different tools to an integrated continuous delivery pipeline, while CodeStar brings the integration to a further step.
-We will introduce what tools does CodeStar include in section \ref{codestar} where we present our implementation of integrated DevOps toolchain in AWS.
+We will introduce what tools does CodeStar include in Section \ref{codestar} where we present our implementation of integrated DevOps toolchain in AWS.
