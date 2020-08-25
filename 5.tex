@@ -20,9 +20,9 @@ As we described in Chapter 4, the continuous delivery pipeline includes the foll
 \par
 In these four steps, the step "Build", and "Checkout" is being done in parallel within the ECS cluster. As we mentioned in CH4, when the new job started in the Jenkins master server, Jenkins will provision a new container instance within the ECS cluster. The container is managed directly by AWS, so we don't need to create and manage the virtual machine that runs the container. We use this setup in our initial implementation as the control group.
 \par
-In the experimental group, we replace AWS Fargate with traditional VM, which is EC2 in the Amazon Web Services.The parallelisation pattern remains the same; this means as in the control group, only the first two steps are being run distributively in the Jenkins nodes. The EC2 instances belong to an auto-scaling group that will scale up when CPU Utilisation rate reach 70\%. The initial size for an auto-scaling group is 1.
+In the experimental group, we replace AWS Fargate with traditional VM, which is EC2 in the Amazon Web Services.The parallelisation pattern remains the same; this means as in the control group, only the first two steps are being run distributively in the Jenkins nodes. The EC2 instances belong to an auto-scaling group that will scale up when CPU Utilisation rate reach 70\%. The initial size for an auto-scaling group is one EC2 virtual machine.
 \par
-Figure \ref{fig:ex1} shows the architecture of 2 groups in this experiment. The experimental group on the left is a Jenkins server with the traditional virtual machine as workers node that hosting the container agent. The architecture of the control group on the right has agent nodes dynamically provisioned as serverless containers hosed by AWS Fargate.
+Figure \ref{fig:ex1} shows the architecture of two groups in this experiment. The experimental group on the left is a Jenkins server with the traditional virtual machine as workers node that hosting the container agent. The architecture of the control group on the right has agent nodes dynamically provisioned as serverless containers hosed by AWS Fargate.
 \begin{figure}[h]
 \centering
 \begin{minipage}{0.45\textwidth}
@@ -43,12 +43,11 @@ The experiments are conducted on Amazon Web Services (AWS). The hardware of Jenk
 \par
 In the control group, which is the implementation we presented in CH4, the Jenkins agents run on AWS ECS powered by AWS Fargate. The virtual hardware resources that are allocated to each serverless container is two virtual CPU, and 2 GB of RAM. The identical hardware setup between to groups makes sure that each container shares the same hardware resources as in another group, so the hardware will not affect the result.
 \subsubsection{Software}
-We maintain the same software setup in each group. The version of the software is all the latest version as for February 2020. The operating System for EC2 instance that runs Jenkins master node is Ubuntu Server 18.04. The version of Jenkins that runs on the server is 2.222.3. For connect ECS and Fargate which works as the Jenkins agents, we use Jenkins plugin "Amazon Elastic Container Service (ECS) / Fargate", version 1.34. The container in Fargate/EC2 for running the Checkout and Build steps is from our developed docker image, which can be seen at \footnote{https://hub.docker.com/r/dry1995/jnlp}. The docker image includes essential dependencies that will be used to build the Spring Boot application. It's the base image include a program which allows container connects Jenkins master as an agent. The "Build" step in our pipeline uses Gradle (version: 6.2.1) as the build tool for the application,
+We maintain the same software setup in each group. The versions of the software are all in the latest version as for February 2020. The operating System of EC2 instance that runs Jenkins master node is Ubuntu Server 18.04. The version of Jenkins that runs on the server is 2.222.3. For connect ECS and Fargate which works as the Jenkins agents, we use Jenkins plugin "Amazon Elastic Container Service (ECS) / Fargate", version 1.34. The container in Fargate/EC2 for running the Checkout and Build steps is from our developed docker image, which can be seen at \footnote{https://hub.docker.com/r/dry1995/jnlp}. The docker image includes essential dependencies that will be used to build the Spring Boot application. It's the base image include a program which allows container connects Jenkins master as an agent. The "Build" step in our pipeline uses Gradle (version: 6.2.1) as the build tool for the application,
 with OpenJDK 1.8.0.252 as Java virtual machine (JVM).
 This step also includes the automated testing and code analysis, as plugins of Gradle. 
 \par
 To shows how does the two setups performance within the teams with different sizes, we run by run the different number of tasks parallel through the pipeline. This scenario simulates the different team size and shows the scalability when it comes to the need for task parallelisation in larger organisations. It also imitates the DevOps process of a microservices software project, which could have multiple jobs for different service runs in parallel.
-
 \subsection{Performance Properties and Evaluation}
 We run the pipeline through 2 different setups, and we will get the result of the following properties:
 \begin{itemize}
@@ -69,7 +68,7 @@ We first compare the runtime of these two setups. Except for test the runtime of
 \par
 The test result shows that when it comes to the execution of a single task. The traditional VM has a faster delivery speed over serverless solution (AWS Fargate). However, with the number of jobs that run in parallel increases, the total runtime on the traditional VM decrease. On the contract, on the serverless solution(Fargate), the runtime remains almost the same.
 \par
-We analyse the reason behind this result, and we found out that the longer runtime with the single job on Fargate is because the longer starting time of Jenkins agent. In EC2, the Jenkins will simply provision a Docker container within EC2 VM, and connect to the Jenkins master node. However, in Fargate, the Jenkins can only connect to the agent once AWS finishes the initialisation of underlay infrastructure that runs the serverless container, which takes a significantly longer time. The slow provisioning shows one of the limitations of serverless computing (cold-start) that we mentioned in \ref{servlesslimitation}.
+We analyse the reason behind this result, and we found out that the longer runtime with the single job on Fargate is because the longer starting time of Jenkins agent. In EC2, the Jenkins will simply provision a Docker container within EC2 VM, and connect to the Jenkins master node. However, in Fargate, the Jenkins can only connect to the agent once AWS finishes the initialisation of underlay infrastructure that runs the serverless container, which takes a significantly longer time. The slow provisioning shows one of the limitations of serverless computing (cold-start) that we mentioned in Section \ref{servlesslimitation}.
 \begin{figure}[!h]
   \centering
   \includegraphics[width=0.90\textwidth]{pics/parallel.png}
@@ -82,7 +81,7 @@ When it comes to parallel job execution, the performance of Fargate is significa
 We also notice that in Figure 5.2, when the parallel task reaches 10, the EC2 runtime becomes shorter. The shorter runtime of EC2 is because we set auto-scaling for our EC2 instance. So in the later part of our experiment, the EC2 scaled from 1 to 2 and then to 3. Nevertheless, even with 3 EC2 instances, only three jobs are allowed to run in parallel, while in Fargate is easy to have ten jobs runs in the complete parallel method. This because the scaling of EC2 VMs is much slower because it is heavier to create a VM than create a new Fargate instance. The other reason is the auto-scaling of EC2 VM is triggered by reaching certain resource utilisation threshold, but in Fargate is based on task number(Jenkins agent number). Even we set the scaling policy of EC2 to a more aggressive pattern, the AWS still more "hesitate" to create new instances compared within the Fargate. 
 Therefore, in the real-life software development, when the number of jobs surges in Jenkins cluster, the Fargate could react faster in terms of scaling. And when the job drops, Fargate also scale-in faster, which saves cost.
 \subsubsection{Resource Utilization}
-We compared the average resource utilisation within containers that runs Jenkins agent in two setups. The data from the AWS CloudWatch (Figure \ref{fig:utilizationecs}) shows that the resource utilisation rate is similar in these two setups. The similarity is because the "run in the same way regardless of the host environment" \cite{WhatisaC60:online} feature of Docker container that we mentioned in \ref{docker}.
+We compared the average resource utilisation within containers that runs Jenkins agent in two setups. The data from the AWS CloudWatch (Figure \ref{fig:utilizationecs}) shows that the resource utilisation rate is similar in these two setups. The similarity is because the "run in the same way regardless of the host environment" \cite{WhatisaC60:online} feature of Docker container that we mentioned in Section \ref{docker}.
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.99\textwidth]{pics/utilizationecs.png}
@@ -98,29 +97,29 @@ In AWS EC2 our cost depends on the type of VM we are using. The type of VM we us
 However, the pay-per-use characteristic of serverless service makes Fargate more competitive in terms of cost. The instance only up and run when Jenkins master distributes the job. Once the job finished, the AWS will terminate Fargate instance immediately when it finds no container is running on it. However, EC2 not so flexible due to the resource-utilisation-based scaling policy. The EC2 instance is not scaled in immediately after job finished, and the user has to pay for the instance runtime before it gets terminated -- even there is no job running in EC2 instance any more. So depends on the frequency and length of the build task, the user could have runtime per hour when using Fargate instance.
 \subsection{Conclusion}
 In this experiment, we compare the serverless (AWS Fargate) and non-serverless solution (EC2) for hosting distributed continuous delivery pipeline. The experiment shows that the performance of the serverless solution is worse when it comes to single job execution, which is because of the cold-start issue with serverless computing. However, in terms of the parallel job executing, the serverless solution has better performance over traditional VM. 
+\begin{table}[h!]
+  \begin{center}
+      \begin{tabular}{|l|l|l|}
+      \hline
+       &
+        EC2 Agents &
+        Fargate Agents \\ \hline
+      Build Time &
+        \begin{tabular}[c]{@{}l@{}}98s for a single task.\\ Largely increases when\\ run multiple tasks in \\ parallel\end{tabular} &
+        \begin{tabular}[c]{@{}l@{}}155s for a single task.\\ Remains unchanged when\\ multiple task runs in \\ parallel\end{tabular} \\ \hline
+      Cost &
+        \begin{tabular}[c]{@{}l@{}}Lower per hour price\\ (\$0.0216)\end{tabular} &
+        \begin{tabular}[c]{@{}l@{}}Higher per hour price\\ (\$0.0931), however the\\ billable hour is shorter,\\ the total price could be\\ lower.\end{tabular} \\ \hline
+      \end{tabular}
+      \caption{Conclusion of Experiment 1}
+      \label{tab:exp1}
+  \end{center}
+      \end{table}
 \par
 \label{micros}
 An better parallel execution performance is meaningful for apply DevOps practice in the microservices development. A microservices could have hundred of services. In the philosophy of microservices, the release of each service should be independently \cite{dehghani2018break}. To ensure this, one practices it to use one pipeline for each service. However managing a hundred pipelines is not an easy task, and better practice is to have multiple services share a single pipeline \cite{HowtoSca9:online}. Therefore, when multiple services share the same pipeline, this improvement allows services to be released independently without waiting for each other.
 \par
 In term of cost, the serverless solution is more expensive per hour. However, the difference could be offset by the less runtime. Moreover, resource utilisation is similar in both solutions. Table \ref{tab:exp1} show a comparison between two experimental groups.
-\begin{table}[h!]
-    \begin{center}
-        \begin{tabular}{|l|l|l|}
-        \hline
-         &
-          EC2 Agents &
-          Fargate Agents \\ \hline
-        Build Time &
-          \begin{tabular}[c]{@{}l@{}}98s for a single task.\\ Largely increases when\\ run multiple tasks in \\ parallel\end{tabular} &
-          \begin{tabular}[c]{@{}l@{}}155s for a single task.\\ Remains unchanged when\\ multiple task runs in \\ parallel\end{tabular} \\ \hline
-        Cost &
-          \begin{tabular}[c]{@{}l@{}}Lower per hour price\\ (\$0.0216)\end{tabular} &
-          \begin{tabular}[c]{@{}l@{}}Higher per hour price\\ (\$0.0931), however the\\ billable hour is shorter,\\ the total price could be\\ lower.\end{tabular} \\ \hline
-        \end{tabular}
-        \caption{Conclusion of Experiment 1}
-        \label{tab:exp1}
-    \end{center}
-        \end{table}
 \section{Experiment 2: Experiment on Integrated DevOps Toolchain}
 For solving the RQ2, we compare the implementation of our design of two different the DevOps toolchain -- the non-integrated Jenkins based toolchain and the AWS DevOps toolchain implementation with AWS DevOps tooling.
 \subsection{Test Task and System Description}
@@ -136,7 +135,7 @@ The version of Jenkins that runs on the server is 2.222.3. We use Jenkins plugin
 We run the pipeline on these two different setups, and we will get the result of the following properties:
 \begin{itemize}
 \item \textit{Runtime} describes the total time for finishing all the jobs. If the jobs run in parallel, the runtime is from the start of jobs until the end of the last finished job. AWS monitors it's parallel execution ability in the document\footnote{https://aws.amazon.com/codepipeline/features/}\footnote{https://aws.amazon.com/codebuild/features/} of both CodePipeline and CodeBuild, thus we will also validate this ability by analysing the parallel executing pattern of AWS integrated toolchain. \label{aws_parallel}
-\item \textit{Cost Structure} describes the daily cost of 2 setups under the same workload, within the same period.
+\item \textit{Cost Structure} describes the daily cost of two setups under the same workload, within the same period.
 \end{itemize}
 The resource utilisation comparison is not available in the experiment since we cannot get the resources utilisation in underlying hardware resource when running AWS DevOps tools.
 \subsection{Quantitative Experiment Result and Evaluation}
@@ -151,7 +150,7 @@ As in Experiment 1, we compared the running time of each toolchain under differe
 \end{figure}
 Figure \ref{fig:compareaws} shows the result of this experiment. The runtime of integrated toolchain increases with the number of the task runs in parallel, while the non-integrated toolchain remains stable regardless of the number of parallel tasks. We will analyse the reason later in this section.
 \par
-From Figure \ref{fig:stage_runtime}, we can see that during the execution of a single job, tow toolchains have similar runtime. The similar runtime is because the build stage, which takes most of the runtime, is running in a similar environment in both toolchains. Both execution environment is within a Docker container runs with the same hardware in AWS. Although, the Docker image for the container is different in two toolchains, and we are not sure what if the actual hardware is the same since we have no visibility to the hardware in both toolchains. However, still, the performance is not so different in both toolchains.
+From Figure \ref{fig:stage_runtime}, we can see that during the execution of a single job, tow toolchains have similar runtime. The similar runtime is because the build stage which takes most of the runtime, is running in a similar environment in both toolchains. Both execution environment is within a Docker container runs with the same hardware in AWS. Although, the Docker image for the container is different in two toolchains, and we are not sure what if the actual hardware is the same since we have no visibility to the hardware in both toolchains. However, still, the performance is not so different in both toolchains.
 \par
 We further observe the time allocation between stages within the runtime in both toolchains. The figure shows our observation. To get the runtime in Figure \ref{fig:stage_runtime}, we run the pipeline in each toolchain for five times and get the average runtime of each stage. The first difference shows in Figure \ref{fig:stage_runtime} is that the Git Checkout stage in AWS integrated toolchain does not run on the container build agent. Instead, it is running in the unknown environment fully managed by AWS.
 \begin{figure}[!h]
@@ -167,7 +166,7 @@ We observed that it takes 10 seconds to do the git checkout when using third-par
  The second difference is that in AWS integrated toolchain, the provisioning of the build environment is much faster. We presume this is due to AWS manages both build agent and this toolchain, and AWS is optimising the provisioning process of the build environment. Furthermore, the cloud instance that runs build environment in CodeBuild might already be started (used for the build task of other users) before CodePipeline sends our build job to CodeBuild. On the other hand, instances (Fargate) that run Jenkins agents is a cold start, which means it is not running before we send build job there.
  Nevertheless, we can also notice that the build time in the AWS integrated toolchain takes a longer time. It is hard for us to find the reason since the hardware configuration used by AWS is unknown except the size of RAM and the number of virtual CPU.
 \par
- Also, we observe that with the workload goes up, the runtime of AWS integrated toolchain increases with it. We already answered why the runtime of the pipeline in our non-integrated toolchain with agent runs in AWS Fargate does not change over time in Section 5.1.3. To explain this, we also check the runtime of each stage when runs several jobs in parallel. We notice that when it has multiple jobs runs in parallel, essential if the parallel jobs' number goes over 5. AWS will start limiting the resource allocation, which limits the number of jobs that runs at the same time. As a result, part of our running jobs has to enter the "Queued" status before entering the "Provisioning" stage. In 10 jobs we run in parallel for the experiment, the time spent for queuing for resource various from 1 second (get resource allocated directly) to 130 seconds. Among these ten jobs, four jobs were put into the queue before resource are available to them. Figure \ref{fig:queued} shows the distribution of queued time among jobs. This validates the claim from AWS about parallel execution ability, which we mentioned in Section \ref{aws_parallel}. However, the parallel pipeline execution is not fully in parallel but with some limitations on available resources.
+ Also, we observe that with the workload goes up, the runtime of AWS integrated toolchain increases with it. We already answered why the runtime of the pipeline in our non-integrated toolchain with agent runs in AWS Fargate does not change over time in Section 5.1.3. To explain this, we also check the runtime of each stage when runs several jobs in parallel. We notice that when it has multiple jobs runs in parallel, essential if the parallel jobs' number goes over five. AWS will start limiting the resource allocation, which limits the number of jobs that runs at the same time. As a result, part of our running jobs has to enter the "Queued" status before entering the "Provisioning" stage. In then jobs we run in parallel for the experiment, the time spent for queuing for resource various from 1 second (get resource allocated directly) to 130 seconds. Among these ten jobs, four jobs were put into the queue before resource are available to them. Figure \ref{fig:queued} shows the distribution of queued time among jobs. This validates the claim\footnote{https://aws.amazon.com/codepipeline/features/} from AWS about parallel execution ability, which we mentioned in Section \ref{aws_parallel}. However, the parallel pipeline execution is not fully in parallel but with some limitations on available resources.
  \begin{figure}[!h]
   \centering
   \includegraphics[width=0.90\textwidth]{pics/queued_time.png}
@@ -178,7 +177,7 @@ We observed that it takes 10 seconds to do the git checkout when using third-par
  The runtime of the non-integrated toolchain is also slightly going up because of the runtime of the build and push container to ECR increases. The reason is obvious, we have these two stages runs on the master node, so the increased data transfer between agent and master and limited computing resource on the Jenkins master increase the runtime. However, as we observed in Experiment 1, the build stage is always fully paralleled, and the runtime of this stage remains unchanged despite the increasing workload. The queuing time for resource in each job is negligible.
  \subsubsection{Cost Analysis}
  As a serverless tool, AWS DevOps tooling charges us according to the time and type of hardware configuration (in CodeBuild) we are using.
-  Each pipeline in CodePipeline cost \$1 per month, which is a negligible amount of \$0.0014 per hour, price of with the build agent type general1.small (Linux instance with 3GB Memory and two vCPU) that we used in the experiment is \$0.3 per hour. The CodeDeploy is free of charge under the condition that we are not deploying to on-premises servers. The cost of S3 which store artifacts (<1 MB in our case) is negligible according to AWS\footnote{https://aws.amazon.com/getting-started/projects/set-up-ci-cd-pipeline/services-costs}. In conclusion, the price should be \$0.30014 per running job for one hour's runtime.
+  Each pipeline in CodePipeline cost \$1 per month, which is a negligible amount of \$0.0014 per hour, price of with the build agent type general1.small (Linux instance with 3GB Memory and two vCPU) that we used in the experiment is \$0.3 per hour. The CodeDeploy is free of charge under the condition that we are not deploying to on-premises servers. The cost of S3 which store artifacts (less than 1 MB in our case) is negligible according to AWS\footnote{https://aws.amazon.com/getting-started/projects/set-up-ci-cd-pipeline/services-costs}. In conclusion, the price should be \$0.30014 per running job for one hour's runtime.
   \par
   In our non-integrated toolchain, our experiment setup (2 vCPU, 4 GB RAM) is different from what we have in 5.1. The price should be \$0.1029 per running agent for one hour's runtime. While the cost of EC2 instance that hosts the Jenkins master node costs \$0.0432 per hour, this price will remain constant when multiple jobs run in parallel. In general, the cost of the non-integrated toolchain is \$0.1452 per hour when only one agent is running.
 From the calculation, we can see that the AWS integrated toolchain is more expensive under similar performance.
