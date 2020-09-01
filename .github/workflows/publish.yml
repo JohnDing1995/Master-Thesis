@@ -18,6 +18,7 @@ jobs:
       - name: Copy compiled pdf
         run: |
             cp -rf thesis.pdf gh-page/files/thesis.pdf
+            cp -rf thesis_presentation.pdf gh-page/files/thesis_presentation.pdf
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
